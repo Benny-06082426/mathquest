@@ -1,11 +1,35 @@
 import { useState, useEffect, useRef } from "react";
 
+/* ═══════════════════════════════════════
+   CORES OFICIAIS MATHQUEST
+═══════════════════════════════════════ */
 const C = {
   blue:"#1E90FF", blueDk:"#0055CC", blueBg:"#0A1628", dark:"#060B16",
   card:"#0D1F3C", gold:"#FFD700", goldDk:"#FF8F00",
   red:"#FF6B6B", green:"#2ECC71", purple:"#6C5CE7", orange:"#FFA63A",
 };
 
+/* ═══════════════════════════════════════
+   STORAGE — persiste no localStorage
+═══════════════════════════════════════ */
+const Storage = {
+  get: (key) => { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch { return null; } },
+  set: (key, val) => { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} },
+  clear: () => { try { localStorage.clear(); } catch {} },
+};
+
+/* ═══════════════════════════════════════
+   GERADOR DE CÓDIGO DO FILHO
+═══════════════════════════════════════ */
+function gerarCodigo(nome) {
+  const n = nome.toUpperCase().replace(/\s/g,"").slice(0,4);
+  const num = Math.floor(1000 + Math.random() * 9000);
+  return `${n}-${num}`;
+}
+
+/* ═══════════════════════════════════════
+   SVGs
+═══════════════════════════════════════ */
 const Logo = ({ s = 32 }) => (
   <svg width={s*.9} height={s} viewBox="0 0 54 60">
     <defs>
@@ -65,7 +89,9 @@ const Coin = ({ sz=18 }) => (
   </svg>
 );
 
-/* ── TOAST ── */
+/* ═══════════════════════════════════════
+   TOAST
+═══════════════════════════════════════ */
 function Toast({ toasts }) {
   return (
     <div style={{position:"absolute",top:60,left:0,right:0,zIndex:999,
@@ -79,8 +105,7 @@ function Toast({ toasts }) {
             :"linear-gradient(135deg,#1E90FF,#0055CC)",
           borderRadius:30,padding:"8px 20px",fontSize:14,fontWeight:900,
           color:t.type==="xp"||t.type==="coin"?"#0D1F3C":"white",
-          fontFamily:"'Fredoka One',sans-serif",
-          boxShadow:"0 4px 20px #00000055",
+          fontFamily:"'Fredoka One',sans-serif",boxShadow:"0 4px 20px #00000055",
           animation:"toastIn 0.3s ease, toastOut 0.3s ease 1.7s forwards",
           display:"flex",alignItems:"center",gap:8,
           border:t.type==="xp"?"2px solid #FFF9C4":"2px solid rgba(255,255,255,0.3)",
@@ -91,7 +116,6 @@ function Toast({ toasts }) {
     </div>
   );
 }
-
 function useToast() {
   const [toasts,setToasts]=useState([]);
   const id=useRef(0);
@@ -103,7 +127,6 @@ function useToast() {
   return {toasts,show};
 }
 
-/* ── BURST ── */
 function RewardBurst({show:visible,onDone}){
   useEffect(()=>{if(visible){const t=setTimeout(onDone,1600);return()=>clearTimeout(t);}},[visible,onDone]);
   if(!visible)return null;
@@ -117,22 +140,82 @@ function RewardBurst({show:visible,onDone}){
   );
 }
 
-/* ── AVATARS ── */
 const AVATARS=["🦊","🐯","🐰","🐻","🦁","🐸","🧙","🧝‍♀️"];
 const GRADES=["1º Ano","2º Ano","3º Ano","4º Ano","5º Ano"];
 
-/* ══════════ LOGIN / ONBOARDING ══════════ */
-function LoginScreen({onDone, returning}){
-  const [step,setStep]=useState(returning ? "login" : "splash");
-  const [mode,setMode]=useState("aluno");
-  const [email,setEmail]=useState("");
-  const [pass,setPass]=useState("");
-  const [name,setName]=useState("");
-  const [avatar,setAvatar]=useState(0);
-  const [grade,setGrade]=useState(null);
-  const [showP,setShowP]=useState(false);
+/* ═══════════════════════════════════════════════════
+   LOGIN / ONBOARDING
+   - Aluno: usa CÓDIGO gerado pelo pai (sem e-mail)
+   - Pai: cadastra com e-mail + adiciona filhos
+═══════════════════════════════════════════════════ */
+function LoginScreen({ onDone }) {
+  const [step, setStep] = useState("splash");
+  const [mode, setMode] = useState("aluno");
+  // pai fields
+  const [email, setEmail]   = useState("");
+  const [pass,  setPass]    = useState("");
+  const [paiNome, setPaiNome] = useState("");
+  // filho fields
+  const [filhoNome,  setFilhoNome]  = useState("");
+  const [filhoGrade, setFilhoGrade] = useState(null);
+  const [filhoAvatar,setFilhoAvatar]= useState(0);
+  const [codigoGerado, setCodigoGerado] = useState("");
+  // aluno fields
+  const [codigo, setCodigo] = useState("");
+  const [codigoErro, setCodigoErro] = useState(false);
+  const [alunoData, setAlunoData] = useState(null);
 
-  if(step==="splash") return(
+  const confirmarCadastroFilho = () => {
+    if (!filhoNome.trim() || filhoGrade === null) return;
+    const cod = gerarCodigo(filhoNome);
+    setCodigoGerado(cod);
+    // Salva pai e filho no localStorage
+    const pais = Storage.get("mq_pais") || [];
+    const filhos = Storage.get("mq_filhos") || [];
+    const novoPai = { email, nome: paiNome, filhos: [cod] };
+    const novoFilho = {
+      codigo: cod, nome: filhoNome,
+      grade: filhoGrade, avatar: filhoAvatar,
+      xp: 0, nivel: 1, streak: 0, acertos: 0, questoes: 0,
+      tempo: "0min", paiEmail: email,
+    };
+    Storage.set("mq_pais", [...pais.filter(p=>p.email!==email), novoPai]);
+    Storage.set("mq_filhos", [...filhos.filter(f=>f.codigo!==cod), novoFilho]);
+    Storage.set("mq_usuario_atual", { tipo:"pai", email, nome: paiNome });
+    setStep("codigo_filho");
+  };
+
+  const entrarComCodigo = () => {
+    const filhos = Storage.get("mq_filhos") || [];
+    const filho = filhos.find(f => f.codigo === codigo.toUpperCase().trim());
+    if (!filho) { setCodigoErro(true); return; }
+    setCodigoErro(false);
+    setAlunoData(filho);
+    Storage.set("mq_usuario_atual", { tipo:"aluno", codigo: filho.codigo, nome: filho.nome, avatar: filho.avatar, grade: filho.grade });
+    setStep("bem_vindo_aluno");
+  };
+
+  const loginPai = () => {
+    const pais = Storage.get("mq_pais") || [];
+    const pai = pais.find(p => p.email === email);
+    if (pai) {
+      Storage.set("mq_usuario_atual", { tipo:"pai", email, nome: pai.nome });
+      onDone("parent");
+    } else {
+      // Novo cadastro de pai
+      setStep("pai_nome");
+    }
+  };
+
+  const loginAluno = () => {
+    // Tenta entrar com código existente
+    const atual = Storage.get("mq_usuario_atual");
+    if (atual?.tipo === "aluno") { onDone("map"); return; }
+    setStep("aluno_codigo");
+  };
+
+  /* ── SPLASH ── */
+  if (step==="splash") return (
     <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",
       justifyContent:"space-between",padding:"60px 32px 52px",
       background:"linear-gradient(160deg,#0D47A1,#1E90FF,#29B6F6)",position:"relative",overflow:"hidden"}}>
@@ -143,7 +226,7 @@ function LoginScreen({onDone, returning}){
       ))}
       <div style={{zIndex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:16,flex:1,justifyContent:"center"}}>
         <div style={{animation:"heroFloat 2s ease-in-out infinite"}}><Fox sz={110}/></div>
-        <div style={{fontSize:52,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",letterSpacing:0,textShadow:"0 4px 20px #00000044",lineHeight:1}}>
+        <div style={{fontSize:52,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",textShadow:"0 4px 20px #00000044",lineHeight:1}}>
           Math<span style={{color:"#FFD700"}}>Quest</span>
         </div>
         <div style={{fontSize:16,color:"#BBDEFB",fontWeight:700}}>Matemática é uma aventura!</div>
@@ -154,70 +237,159 @@ function LoginScreen({onDone, returning}){
     </div>
   );
 
-  if(step==="welcome") return(
+  /* ── WELCOME — escolha quem é ── */
+  if (step==="welcome") return (
     <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",padding:"36px 24px 28px",gap:20,
       background:"linear-gradient(180deg,#0A1628,#0D1F3C)"}}>
       <div style={{animation:"heroFloat 2.5s ease-in-out infinite"}}><Fox sz={80}/></div>
-      <div style={{fontSize:26,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",textAlign:"center"}}>Olá, aventureiro! 👋</div>
+      <div style={{fontSize:26,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",textAlign:"center"}}>Olá! Quem é você? 👋</div>
       <div style={{fontSize:14,color:"#90CAF9",fontWeight:600,textAlign:"center",lineHeight:1.6}}>
-        Bem-vindo ao MathQuest — onde aprender matemática vira uma missão épica!
+        Escolha como quer entrar no MathQuest
+      </div>
+
+      {/* Cards de escolha */}
+      <div style={{display:"flex",flexDirection:"column",gap:12,width:"100%",marginTop:8}}>
+        {/* Aluno */}
+        <button onClick={()=>setStep("aluno_codigo")} style={{
+          display:"flex",alignItems:"center",gap:16,padding:"18px 20px",
+          borderRadius:20,cursor:"pointer",
+          background:"linear-gradient(135deg,#1E90FF22,#1E90FF11)",
+          border:`3px solid ${C.blue}`,
+          transition:"all 0.2s",boxShadow:`0 4px 16px ${C.blue}22`}}>
+          <div style={{fontSize:44}}>🎒</div>
+          <div style={{textAlign:"left"}}>
+            <div style={{fontSize:17,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>Sou Aluno</div>
+            <div style={{fontSize:12,color:"#90CAF9",fontWeight:600}}>Entro com meu código de acesso</div>
+          </div>
+          <span style={{marginLeft:"auto",fontSize:20,color:C.blue}}>→</span>
+        </button>
+
+        {/* Pai */}
+        <button onClick={()=>setStep("pai_login")} style={{
+          display:"flex",alignItems:"center",gap:16,padding:"18px 20px",
+          borderRadius:20,cursor:"pointer",
+          background:`linear-gradient(135deg,${C.gold}22,${C.gold}11)`,
+          border:`3px solid ${C.gold}`,
+          transition:"all 0.2s",boxShadow:`0 4px 16px ${C.gold}22`}}>
+          <div style={{fontSize:44}}>👨‍👩‍👧</div>
+          <div style={{textAlign:"left"}}>
+            <div style={{fontSize:17,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>Sou Pai / Mãe</div>
+            <div style={{fontSize:12,color:"#90CAF9",fontWeight:600}}>Cadastro meus filhos e acompanho</div>
+          </div>
+          <span style={{marginLeft:"auto",fontSize:20,color:C.gold}}>→</span>
+        </button>
+
+        {/* Professor */}
+        <button onClick={()=>setStep("pai_login")} style={{
+          display:"flex",alignItems:"center",gap:16,padding:"18px 20px",
+          borderRadius:20,cursor:"pointer",
+          background:`linear-gradient(135deg,${C.purple}22,${C.purple}11)`,
+          border:`3px solid ${C.purple}`,
+          transition:"all 0.2s",boxShadow:`0 4px 16px ${C.purple}22`}}>
+          <div style={{fontSize:44}}>👩‍🏫</div>
+          <div style={{textAlign:"left"}}>
+            <div style={{fontSize:17,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>Sou Professor(a)</div>
+            <div style={{fontSize:12,color:"#90CAF9",fontWeight:600}}>Acompanho minha turma</div>
+          </div>
+          <span style={{marginLeft:"auto",fontSize:20,color:C.purple}}>→</span>
+        </button>
+      </div>
+    </div>
+  );
+
+  /* ── ALUNO — entra com código ── */
+  if (step==="aluno_codigo") return (
+    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",
+      padding:"32px 24px",gap:16,background:"linear-gradient(180deg,#0A1628,#0D1F3C)"}}>
+      <button onClick={()=>setStep("welcome")} style={{alignSelf:"flex-start",background:"none",border:"none",
+        color:C.blue,fontSize:13,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",cursor:"pointer"}}>◀ Voltar</button>
+      <div style={{fontSize:64,animation:"heroFloat 2s ease-in-out infinite"}}>🎒</div>
+      <div style={{fontSize:24,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",textAlign:"center"}}>
+        Qual é o seu código?
+      </div>
+      <div style={{fontSize:13,color:"#90CAF9",fontWeight:600,textAlign:"center",lineHeight:1.6}}>
+        Seu pai ou mãe criou um código especial só para você! Pede para eles te mostrar 😊
+      </div>
+
+      {/* Código input */}
+      <input
+        value={codigo}
+        onChange={e=>{setCodigo(e.target.value.toUpperCase());setCodigoErro(false);}}
+        placeholder="Ex: CAIO-1234"
+        maxLength={9}
+        style={{width:"100%",padding:"18px 20px",borderRadius:16,textAlign:"center",
+          border:`3px solid ${codigoErro?C.red:codigo.length>0?C.gold:"rgba(255,255,255,0.1)"}`,
+          background:"rgba(255,255,255,0.06)",fontSize:24,fontWeight:900,
+          fontFamily:"'Fredoka One',sans-serif",outline:"none",letterSpacing:4,
+          color:"white",transition:"border-color 0.3s"}}/>
+
+      {codigoErro && (
+        <div style={{background:`${C.red}22`,border:`2px solid ${C.red}44`,borderRadius:14,
+          padding:"10px 16px",width:"100%",textAlign:"center"}}>
+          <div style={{fontSize:13,fontWeight:900,color:C.red,fontFamily:"'Fredoka One',sans-serif"}}>
+            😅 Código não encontrado!
+          </div>
+          <div style={{fontSize:11,color:"rgba(255,107,107,0.8)",fontWeight:600,marginTop:2}}>
+            Pede para seu pai ou mãe verificar o código
+          </div>
+        </div>
+      )}
+
+      <button onClick={entrarComCodigo} style={{width:"100%",padding:15,borderRadius:20,border:"none",
+        background:codigo.length>=6?`linear-gradient(135deg,${C.gold},${C.goldDk})`:"rgba(255,255,255,0.1)",
+        color:codigo.length>=6?C.dark:"#4A7AB5",fontSize:17,fontWeight:900,
+        fontFamily:"'Fredoka One',sans-serif",cursor:codigo.length>=6?"pointer":"not-allowed",
+        boxShadow:codigo.length>=6?`0 5px 0 #B86000`:"none",transition:"all 0.2s",marginTop:"auto"}}>
+        🚀 Entrar no jogo!
+      </button>
+    </div>
+  );
+
+  /* ── BEM VINDO ALUNO ── */
+  if (step==="bem_vindo_aluno" && alunoData) return (
+    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+      gap:16,padding:28,background:"linear-gradient(160deg,#0D47A1,#1E90FF)"}}>
+      <div style={{fontSize:60,animation:"bounce 0.8s ease-in-out infinite"}}>🎉</div>
+      <div style={{animation:"heroFloat 2s ease-in-out infinite"}}><Fox sz={90} mood="wow"/></div>
+      <div style={{fontSize:28,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",textAlign:"center"}}>
+        Olá, {alunoData.nome}! 👋
+      </div>
+      <div style={{fontSize:14,color:"#BBDEFB",fontWeight:600,textAlign:"center",lineHeight:1.6}}>
+        Bem-vindo(a) de volta! Sua aventura continua. Boa sorte, {GRADES[alunoData.grade]}! ⭐
       </div>
       <div style={{display:"flex",gap:10,width:"100%"}}>
-        {["aluno","pai"].map(m=>(
-          <button key={m} onClick={()=>setMode(m)} style={{flex:1,padding:"12px 0",borderRadius:16,cursor:"pointer",
-            background:mode===m?`linear-gradient(135deg,${C.gold},${C.goldDk})`:"rgba(255,255,255,0.08)",
-            color:mode===m?C.dark:"#90CAF9",border:mode===m?`2px solid #FFF9C4`:"2px solid rgba(255,255,255,0.12)",
-            fontSize:14,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",transition:"all 0.2s"}}>
-            {m==="aluno"?"🎒 Sou Aluno":"👨‍👩‍👧 Sou Pai/Mãe"}
-          </button>
+        {[
+          {i:AVATARS[alunoData.avatar],v:alunoData.nome,d:"Aventureiro"},
+          {i:"⚡",v:`${alunoData.xp} XP`,d:"Pontuação"},
+          {i:"🔥",v:`${alunoData.streak} dias`,d:"Sequência"},
+        ].map((s,i)=>(
+          <div key={i} style={{flex:1,background:"rgba(255,255,255,0.15)",borderRadius:16,padding:"12px 6px",
+            textAlign:"center",border:"2px solid rgba(255,255,255,0.25)"}}>
+            <div style={{fontSize:22}}>{s.i}</div>
+            <div style={{fontSize:13,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>{s.v}</div>
+            <div style={{fontSize:9,color:"#BBDEFB"}}>{s.d}</div>
+          </div>
         ))}
       </div>
-      <div style={{display:"flex",flexDirection:"column",gap:10,width:"100%",marginTop:"auto"}}>
-        <button onClick={()=>setStep("register")} style={{width:"100%",padding:15,borderRadius:20,border:"none",
-          background:`linear-gradient(135deg,${C.blue},${C.blueDk})`,color:"white",fontSize:17,fontWeight:900,
-          fontFamily:"'Fredoka One',sans-serif",cursor:"pointer",boxShadow:`0 5px 0 #003A99`}}>✨ Criar conta grátis</button>
-        <button onClick={()=>setStep("login")} style={{width:"100%",padding:14,borderRadius:20,
-          border:`3px solid ${C.gold}`,background:"transparent",color:C.gold,fontSize:16,fontWeight:900,
-          fontFamily:"'Fredoka One',sans-serif",cursor:"pointer"}}>Já tenho conta →</button>
-      </div>
+      <button onClick={()=>onDone("map")} style={{width:"100%",padding:16,borderRadius:20,border:"none",
+        background:"white",color:"#0D47A1",fontSize:18,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",
+        cursor:"pointer",boxShadow:"0 6px 24px #00000033"}}>🏠 Jogar agora!</button>
     </div>
   );
 
-  if(step==="login") return(
+  /* ── PAI LOGIN ── */
+  if (step==="pai_login") return (
     <div style={{flex:1,display:"flex",flexDirection:"column",padding:"20px 24px",gap:14,
       background:"linear-gradient(180deg,#0A1628,#0D1F3C)",overflowY:"auto"}}>
-      <button onClick={()=>setStep("welcome")} style={{background:"none",border:"none",color:C.blue,fontSize:13,
-        fontWeight:900,fontFamily:"'Fredoka One',sans-serif",cursor:"pointer",textAlign:"left",padding:0}}>◀ Voltar</button>
-      <div style={{textAlign:"center",animation:"heroFloat 2s ease-in-out infinite"}}><Fox sz={72}/></div>
-      <div style={{fontSize:26,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",textAlign:"center"}}>Entrar na aventura</div>
-      <div style={{fontSize:13,color:"#90CAF9",textAlign:"center",fontWeight:600}}>Que saudade! Vamos lá 🎉</div>
-      {[["📧 E-mail","email","seu@email.com",email,setEmail],["🔒 Senha","password","••••••••",pass,setPass]].map(([lbl,tp,ph,val,set],i)=>(
-        <div key={i} style={{display:"flex",flexDirection:"column",gap:5}}>
-          <label style={{fontSize:11,fontWeight:800,color:"#90CAF9",textTransform:"uppercase",letterSpacing:1}}>{lbl}</label>
-          <input value={val} onChange={e=>set(e.target.value)} placeholder={ph} type={i===1&&!showP?"password":tp}
-            style={{padding:"13px 16px",borderRadius:14,border:`2px solid rgba(255,255,255,0.08)`,
-              background:"rgba(255,255,255,0.06)",fontSize:15,fontWeight:700,outline:"none"}}/>
-        </div>
-      ))}
-      <button onClick={()=>onDone("map")} style={{width:"100%",padding:15,borderRadius:20,border:"none",
-        background:`linear-gradient(135deg,${C.gold},${C.goldDk})`,color:C.dark,fontSize:17,fontWeight:900,
-        fontFamily:"'Fredoka One',sans-serif",cursor:"pointer",boxShadow:`0 5px 0 #B86000`}}>🚀 Entrar</button>
-      <div style={{textAlign:"center",fontSize:13,color:"#4A7AB5",fontWeight:600}}>
-        Não tem conta?{" "}
-        <button onClick={()=>setStep("register")} style={{background:"none",border:"none",color:C.gold,
-          fontWeight:900,cursor:"pointer",fontFamily:"'Fredoka One',sans-serif"}}>Criar agora →</button>
+      <button onClick={()=>setStep("welcome")} style={{background:"none",border:"none",color:C.blue,
+        fontSize:13,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",cursor:"pointer",textAlign:"left",padding:0}}>◀ Voltar</button>
+      <div style={{textAlign:"center",fontSize:52,animation:"heroFloat 2s ease-in-out infinite"}}>👨‍👩‍👧</div>
+      <div style={{fontSize:24,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",textAlign:"center"}}>Acesso dos Pais</div>
+      <div style={{fontSize:13,color:"#90CAF9",textAlign:"center",fontWeight:600}}>
+        Cadastre-se para acompanhar seus filhos
       </div>
-    </div>
-  );
-
-  if(step==="register") return(
-    <div style={{flex:1,display:"flex",flexDirection:"column",padding:"20px 24px",gap:14,
-      background:"linear-gradient(180deg,#0A1628,#0D1F3C)",overflowY:"auto"}}>
-      <button onClick={()=>setStep("welcome")} style={{background:"none",border:"none",color:C.blue,fontSize:13,
-        fontWeight:900,fontFamily:"'Fredoka One',sans-serif",cursor:"pointer",textAlign:"left",padding:0}}>◀ Voltar</button>
-      <div style={{textAlign:"center",fontSize:56,animation:"heroFloat 2s ease-in-out infinite"}}>✨</div>
-      <div style={{fontSize:26,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",textAlign:"center"}}>Criar conta grátis</div>
-      {[["📧 E-mail","email","seu@email.com",email,setEmail],["🔒 Senha","password","Mínimo 6 caracteres",pass,setPass]].map(([lbl,tp,ph,val,set],i)=>(
+      {[["📧 E-mail","email","seu@email.com",email,setEmail],
+        ["🔒 Senha","password","Mínimo 6 caracteres",pass,setPass]].map(([lbl,tp,ph,val,set],i)=>(
         <div key={i} style={{display:"flex",flexDirection:"column",gap:5}}>
           <label style={{fontSize:11,fontWeight:800,color:"#90CAF9",textTransform:"uppercase",letterSpacing:1}}>{lbl}</label>
           <input value={val} onChange={e=>set(e.target.value)} placeholder={ph} type={tp}
@@ -225,202 +397,167 @@ function LoginScreen({onDone, returning}){
               background:"rgba(255,255,255,0.06)",fontSize:15,fontWeight:700,outline:"none"}}/>
         </div>
       ))}
-      <button onClick={()=>setStep("avatar")} style={{width:"100%",padding:15,borderRadius:20,border:"none",
-        background:`linear-gradient(135deg,${C.blue},${C.blueDk})`,color:"white",fontSize:17,fontWeight:900,
-        fontFamily:"'Fredoka One',sans-serif",cursor:"pointer",boxShadow:`0 5px 0 #003A99`}}>✨ Criar minha conta</button>
-    </div>
-  );
-
-  if(step==="avatar") return(
-    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",padding:"24px 24px 32px",gap:14,
-      background:"linear-gradient(180deg,#0A1628,#0D1F3C)"}}>
-      <div style={{fontSize:11,fontWeight:800,color:"#4A7AB5",textTransform:"uppercase",letterSpacing:2}}>Passo 1 de 3</div>
-      <div style={{display:"flex",gap:5}}>{[0,1,2].map(i=><div key={i} style={{width:32,height:6,borderRadius:10,background:i===0?C.gold:"rgba(255,255,255,0.15)"}}/>)}</div>
-      <div style={{fontSize:52,animation:"heroFloat 2s ease-in-out infinite"}}>{AVATARS[avatar]}</div>
-      <div style={{fontSize:22,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>Escolha seu avatar!</div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,width:"100%"}}>
-        {AVATARS.map((av,i)=>(
-          <button key={i} onClick={()=>setAvatar(i)} style={{borderRadius:18,padding:"14px 0",fontSize:30,cursor:"pointer",
-            background:avatar===i?`linear-gradient(135deg,${C.gold}33,${C.goldDk}22)`:"rgba(255,255,255,0.06)",
-            border:avatar===i?`3px solid ${C.gold}`:"3px solid rgba(255,255,255,0.1)",
-            transform:avatar===i?"scale(1.12)":"scale(1)",
-            boxShadow:avatar===i?`0 4px 16px ${C.gold}44`:"none",transition:"all 0.2s"}}>{av}</button>
-        ))}
-      </div>
-      <button onClick={()=>setStep("name")} style={{width:"100%",padding:15,borderRadius:20,border:"none",marginTop:"auto",
+      <button onClick={loginPai} style={{width:"100%",padding:15,borderRadius:20,border:"none",
         background:`linear-gradient(135deg,${C.gold},${C.goldDk})`,color:C.dark,fontSize:17,fontWeight:900,
-        fontFamily:"'Fredoka One',sans-serif",cursor:"pointer",boxShadow:`0 5px 0 #B86000`}}>Próximo →</button>
-    </div>
-  );
-
-  if(step==="name") return(
-    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",padding:"24px 24px 32px",gap:14,
-      background:"linear-gradient(180deg,#0A1628,#0D1F3C)"}}>
-      <div style={{fontSize:11,fontWeight:800,color:"#4A7AB5",textTransform:"uppercase",letterSpacing:2}}>Passo 2 de 3</div>
-      <div style={{display:"flex",gap:5}}>{[0,1,2].map(i=><div key={i} style={{width:32,height:6,borderRadius:10,background:i<=1?C.gold:"rgba(255,255,255,0.15)"}}/>)}</div>
-      <div style={{fontSize:52,animation:"heroFloat 2s ease-in-out infinite"}}>{mode==="pai"?"👨‍👩‍👧":AVATARS[avatar]}</div>
-      <div style={{fontSize:22,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>Qual é o seu nome?</div>
-      <div style={{fontSize:13,color:"#90CAF9",fontWeight:600}}>{mode==="pai"?"Como devemos te chamar? 👋":"Como vamos te chamar na aventura? 🏷️"}</div>
-      <input value={name} onChange={e=>setName(e.target.value)}
-        placeholder={mode==="pai"?"Seu nome...":"Digite seu nome..."}
-        style={{width:"100%",padding:"16px 20px",borderRadius:16,textAlign:"center",
-          border:`3px solid ${name?C.gold:"rgba(255,255,255,0.1)"}`,
-          background:"rgba(255,255,255,0.06)",fontSize:20,fontWeight:900,
-          fontFamily:"'Fredoka One',sans-serif",outline:"none",transition:"border-color 0.3s"}}/>
-      {name.length>0&&(
-        <div style={{display:"flex",alignItems:"center",gap:10,background:`${C.gold}18`,
-          border:`2px solid ${C.gold}44`,borderRadius:16,padding:"10px 20px",width:"100%"}}>
-          <span style={{fontSize:28}}>{mode==="pai"?"👨‍👩‍👧":AVATARS[avatar]}</span>
-          <span style={{fontWeight:900,fontSize:16,color:C.gold,fontFamily:"'Fredoka One',sans-serif"}}>
-            {mode==="pai"?`Olá, ${name}! Vamos acompanhar seus filhos 👶`:`Olá, ${name}! 👋`}
-          </span>
-        </div>
-      )}
-      <button onClick={()=>name.trim()&&setStep(mode==="pai"?"addchild":"grade")} style={{width:"100%",padding:15,borderRadius:20,border:"none",marginTop:"auto",
-        background:name.trim()?`linear-gradient(135deg,${C.gold},${C.goldDk})`:"rgba(255,255,255,0.1)",
-        color:name.trim()?C.dark:"#4A7AB5",fontSize:17,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",
-        cursor:name.trim()?"pointer":"not-allowed",boxShadow:name.trim()?`0 5px 0 #B86000`:"none",
-        transition:"all 0.2s"}}>Próximo →</button>
-    </div>
-  );
-
-  if(step==="addchild") return(
-    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",padding:"24px 24px 32px",gap:14,
-      background:"linear-gradient(180deg,#0A1628,#0D1F3C)",overflowY:"auto"}}>
-      <div style={{fontSize:11,fontWeight:800,color:"#4A7AB5",textTransform:"uppercase",letterSpacing:2}}>Passo 3 de 3</div>
-      <div style={{display:"flex",gap:5}}>{[0,1,2].map(i=><div key={i} style={{width:32,height:6,borderRadius:10,background:C.gold}}/>)}</div>
-      <div style={{fontSize:48,animation:"heroFloat 2s ease-in-out infinite"}}>👶</div>
-      <div style={{fontSize:22,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",textAlign:"center"}}>Adicione seu filho(a)</div>
-      <div style={{fontSize:13,color:"#90CAF9",fontWeight:600,textAlign:"center"}}>Você pode adicionar mais filhos depois no painel 👨‍👩‍👧</div>
-      <div style={{display:"flex",flexDirection:"column",gap:6,width:"100%"}}>
-        <label style={{fontSize:11,fontWeight:800,color:"#90CAF9",textTransform:"uppercase",letterSpacing:1}}>🧒 Nome do filho(a)</label>
-        <input placeholder="Ex: Sofia"
-          style={{width:"100%",padding:"14px 16px",borderRadius:14,
-            border:"2px solid rgba(255,255,255,0.1)",
-            background:"rgba(255,255,255,0.06)",fontSize:16,fontWeight:700,outline:"none"}}/>
+        fontFamily:"'Fredoka One',sans-serif",cursor:"pointer",boxShadow:`0 5px 0 #B86000`,marginTop:4}}>
+        👨‍👩‍👧 Entrar / Cadastrar
+      </button>
+      <div style={{fontSize:11,color:"#4A7AB5",textAlign:"center",fontWeight:600}}>
+        Se já tem conta, entrará direto no painel. Se não, criaremos sua conta agora.
       </div>
-      <div style={{display:"flex",flexDirection:"column",gap:6,width:"100%"}}>
-        <label style={{fontSize:11,fontWeight:800,color:"#90CAF9",textTransform:"uppercase",letterSpacing:1}}>📚 Série do filho(a)</label>
+    </div>
+  );
+
+  /* ── PAI NOME ── */
+  if (step==="pai_nome") return (
+    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",
+      padding:"24px 24px 32px",gap:14,background:"linear-gradient(180deg,#0A1628,#0D1F3C)"}}>
+      <div style={{fontSize:11,fontWeight:800,color:"#4A7AB5",textTransform:"uppercase",letterSpacing:2}}>Quase lá!</div>
+      <div style={{fontSize:52,animation:"heroFloat 2s ease-in-out infinite"}}>👋</div>
+      <div style={{fontSize:22,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",textAlign:"center"}}>Como você se chama?</div>
+      <div style={{fontSize:13,color:"#90CAF9",fontWeight:600,textAlign:"center"}}>Seu nome no painel de acompanhamento</div>
+      <input value={paiNome} onChange={e=>setPaiNome(e.target.value)} placeholder="Seu nome..."
+        style={{width:"100%",padding:"16px 20px",borderRadius:16,textAlign:"center",
+          border:`3px solid ${paiNome?C.gold:"rgba(255,255,255,0.1)"}`,
+          background:"rgba(255,255,255,0.06)",fontSize:20,fontWeight:900,
+          fontFamily:"'Fredoka One',sans-serif",outline:"none",color:"white"}}/>
+      <button onClick={()=>paiNome.trim()&&setStep("add_filho")} style={{width:"100%",padding:15,borderRadius:20,
+        border:"none",marginTop:"auto",
+        background:paiNome.trim()?`linear-gradient(135deg,${C.gold},${C.goldDk})`:"rgba(255,255,255,0.1)",
+        color:paiNome.trim()?C.dark:"#4A7AB5",fontSize:17,fontWeight:900,
+        fontFamily:"'Fredoka One',sans-serif",cursor:paiNome.trim()?"pointer":"not-allowed",
+        boxShadow:paiNome.trim()?`0 5px 0 #B86000`:"none",transition:"all 0.2s"}}>
+        Próximo →
+      </button>
+    </div>
+  );
+
+  /* ── ADD FILHO ── */
+  if (step==="add_filho") return (
+    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",
+      padding:"20px 24px 28px",gap:12,background:"linear-gradient(180deg,#0A1628,#0D1F3C)",overflowY:"auto"}}>
+      <div style={{fontSize:11,fontWeight:800,color:"#4A7AB5",textTransform:"uppercase",letterSpacing:2}}>
+        Cadastrar filho(a)
+      </div>
+      <div style={{fontSize:44,animation:"heroFloat 2s ease-in-out infinite"}}>👶</div>
+      <div style={{fontSize:20,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",textAlign:"center"}}>
+        Dados do seu filho(a)
+      </div>
+      <div style={{fontSize:12,color:"#90CAF9",fontWeight:600,textAlign:"center"}}>
+        Preencha os dados para criar o código de acesso dele(a)
+      </div>
+
+      {/* Nome do filho */}
+      <div style={{display:"flex",flexDirection:"column",gap:5,width:"100%"}}>
+        <label style={{fontSize:11,fontWeight:800,color:"#90CAF9",textTransform:"uppercase",letterSpacing:1}}>
+          🧒 Nome do filho(a)
+        </label>
+        <input value={filhoNome} onChange={e=>setFilhoNome(e.target.value)} placeholder="Ex: Caio, Sofia..."
+          style={{padding:"13px 16px",borderRadius:14,
+            border:`2px solid ${filhoNome?C.gold:"rgba(255,255,255,0.1)"}`,
+            background:"rgba(255,255,255,0.06)",fontSize:16,fontWeight:700,
+            outline:"none",color:"white",transition:"border-color 0.3s"}}/>
+      </div>
+
+      {/* Série */}
+      <div style={{display:"flex",flexDirection:"column",gap:5,width:"100%"}}>
+        <label style={{fontSize:11,fontWeight:800,color:"#90CAF9",textTransform:"uppercase",letterSpacing:1}}>
+          📚 Série escolar
+        </label>
         <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
           {GRADES.map((g,i)=>(
-            <button key={i} onClick={()=>setGrade(i)} style={{
-              padding:"10px 14px",borderRadius:14,cursor:"pointer",transition:"all 0.2s",
-              background:grade===i?`linear-gradient(135deg,${C.blue},${C.blueDk})`:"rgba(255,255,255,0.06)",
-              color:"white",border:grade===i?`2px solid #90CAF9`:"2px solid rgba(255,255,255,0.1)",
+            <button key={i} onClick={()=>setFilhoGrade(i)} style={{
+              padding:"9px 12px",borderRadius:14,cursor:"pointer",transition:"all 0.2s",
+              background:filhoGrade===i?`linear-gradient(135deg,${C.blue},${C.blueDk})`:"rgba(255,255,255,0.06)",
+              color:"white",border:filhoGrade===i?`2px solid #90CAF9`:"2px solid rgba(255,255,255,0.1)",
               fontFamily:"'Fredoka One',sans-serif",fontSize:12,fontWeight:900}}>
               {["📗","📘","📙","📕","📓"][i]} {g}
             </button>
           ))}
         </div>
       </div>
-      <div style={{display:"flex",flexDirection:"column",gap:6,width:"100%"}}>
-        <label style={{fontSize:11,fontWeight:800,color:"#90CAF9",textTransform:"uppercase",letterSpacing:1}}>🎭 Avatar do filho(a)</label>
+
+      {/* Avatar */}
+      <div style={{display:"flex",flexDirection:"column",gap:5,width:"100%"}}>
+        <label style={{fontSize:11,fontWeight:800,color:"#90CAF9",textTransform:"uppercase",letterSpacing:1}}>
+          🎭 Avatar favorito
+        </label>
         <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-          {AVATARS.slice(0,6).map((av,i)=>(
-            <button key={i} onClick={()=>setAvatar(i)} style={{
-              width:52,height:52,borderRadius:14,fontSize:26,cursor:"pointer",
-              background:avatar===i?`${C.gold}33`:"rgba(255,255,255,0.06)",
-              border:avatar===i?`3px solid ${C.gold}`:"2px solid rgba(255,255,255,0.1)",
-              transform:avatar===i?"scale(1.1)":"scale(1)",transition:"all 0.2s"}}>{av}</button>
+          {AVATARS.map((av,i)=>(
+            <button key={i} onClick={()=>setFilhoAvatar(i)} style={{
+              width:50,height:50,borderRadius:14,fontSize:24,cursor:"pointer",
+              background:filhoAvatar===i?`${C.gold}33`:"rgba(255,255,255,0.06)",
+              border:filhoAvatar===i?`3px solid ${C.gold}`:"2px solid rgba(255,255,255,0.1)",
+              transform:filhoAvatar===i?"scale(1.1)":"scale(1)",transition:"all 0.2s"}}>{av}</button>
           ))}
         </div>
       </div>
-      <button onClick={()=>grade!==null&&setStep("ready")} style={{width:"100%",padding:15,borderRadius:20,border:"none",marginTop:"auto",
-        background:grade!==null?`linear-gradient(135deg,${C.gold},${C.goldDk})`:"rgba(255,255,255,0.1)",
-        color:grade!==null?C.dark:"#4A7AB5",fontSize:17,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",
-        cursor:grade!==null?"pointer":"not-allowed",boxShadow:grade!==null?`0 5px 0 #B86000`:"none",
-        transition:"all 0.2s"}}>🚀 Acessar painel!</button>
-    </div>
-  );
 
-  if(step==="grade") return(
-    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",padding:"24px 24px 32px",gap:14,
-      background:"linear-gradient(180deg,#0A1628,#0D1F3C)",overflowY:"auto"}}>
-      <div style={{fontSize:11,fontWeight:800,color:"#4A7AB5",textTransform:"uppercase",letterSpacing:2}}>Passo 3 de 3</div>
-      <div style={{display:"flex",gap:5}}>{[0,1,2].map(i=><div key={i} style={{width:32,height:6,borderRadius:10,background:C.gold}}/>)}</div>
-      <div style={{fontSize:52}}>{AVATARS[avatar]}</div>
-      <div style={{fontSize:22,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>Qual é a sua série?</div>
-      <div style={{display:"flex",flexDirection:"column",gap:8,width:"100%"}}>
-        {GRADES.map((g,i)=>(
-          <button key={i} onClick={()=>setGrade(i)} style={{display:"flex",alignItems:"center",gap:14,padding:"14px 18px",
-            borderRadius:16,cursor:"pointer",transition:"all 0.2s",
-            background:grade===i?`linear-gradient(135deg,${C.blue},${C.blueDk})`:"rgba(255,255,255,0.06)",
-            color:"white",border:grade===i?`2px solid #90CAF9`:"2px solid rgba(255,255,255,0.1)",
-            boxShadow:grade===i?`0 4px 16px ${C.blue}44`:"none",
-            fontFamily:"'Fredoka One',sans-serif",fontSize:16}}>
-            <span>{["📗","📘","📙","📕","📓"][i]}</span>
-            <span style={{flex:1,fontWeight:900}}>{g}</span>
-            {grade===i&&<span style={{fontSize:18}}>✓</span>}
-          </button>
-        ))}
-      </div>
-      <button onClick={()=>grade!==null&&setStep("ready")} style={{width:"100%",padding:15,borderRadius:20,border:"none",marginTop:4,
-        background:grade!==null?`linear-gradient(135deg,${C.gold},${C.goldDk})`:"rgba(255,255,255,0.1)",
-        color:grade!==null?C.dark:"#4A7AB5",fontSize:17,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",
-        cursor:grade!==null?"pointer":"not-allowed",boxShadow:grade!==null?`0 5px 0 #B86000`:"none",
-        transition:"all 0.2s"}}>🚀 Começar aventura!</button>
-    </div>
-  );
-
-  // READY SCREEN — diferente para pai vs aluno
-  if(mode==="pai") return(
-    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:16,padding:28,
-      background:"linear-gradient(160deg,#0D2D6E,#1565C0)"}}>
-      <div style={{fontSize:60,animation:"bounce 0.8s ease-in-out infinite"}}>🎉</div>
-      <div style={{fontSize:52}}>👨‍👩‍👧</div>
-      <div style={{fontSize:26,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",textAlign:"center"}}>
-        Tudo pronto, {name}!
-      </div>
-      <div style={{fontSize:14,color:"#BBDEFB",fontWeight:600,textAlign:"center",lineHeight:1.6}}>
-        Seu painel de acompanhamento está ativo. Monitore o progresso, tempo de estudo e desempenho do seu filho(a) em tempo real.
-      </div>
-      <div style={{display:"flex",gap:10,width:"100%"}}>
-        {[{i:"📊",v:"Relatórios",d:"detalhados"},{i:"⏱️",v:"Tempo",d:"de estudo"},{i:"🎯",v:"Acertos",d:"por matéria"}].map((s,i)=>(
-          <div key={i} style={{flex:1,background:"rgba(255,255,255,0.12)",borderRadius:16,padding:"12px 6px",
-            textAlign:"center",border:"2px solid rgba(255,255,255,0.2)"}}>
-            <div style={{fontSize:24}}>{s.i}</div>
-            <div style={{fontSize:12,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>{s.v}</div>
-            <div style={{fontSize:10,color:"#90CAF9",fontWeight:600}}>{s.d}</div>
-          </div>
-        ))}
-      </div>
-      <button onClick={()=>onDone("parent")} style={{width:"100%",padding:16,borderRadius:20,border:"none",
-        background:`linear-gradient(135deg,#FFD700,#FF8F00)`,color:"#0D1F3C",fontSize:18,fontWeight:900,
-        fontFamily:"'Fredoka One',sans-serif",cursor:"pointer",
-        boxShadow:"0 5px 0 #B86000, 0 8px 24px #FFD70044"}}>
-        👨‍👩‍👧 Ir para o painel!
+      <button onClick={confirmarCadastroFilho} style={{width:"100%",padding:14,borderRadius:20,border:"none",
+        background:filhoNome.trim()&&filhoGrade!==null
+          ?`linear-gradient(135deg,${C.gold},${C.goldDk})`:"rgba(255,255,255,0.1)",
+        color:filhoNome.trim()&&filhoGrade!==null?C.dark:"#4A7AB5",
+        fontSize:16,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",
+        cursor:filhoNome.trim()&&filhoGrade!==null?"pointer":"not-allowed",
+        boxShadow:filhoNome.trim()&&filhoGrade!==null?`0 5px 0 #B86000`:"none",
+        transition:"all 0.2s",marginTop:4}}>
+        ✨ Gerar código de acesso
       </button>
     </div>
   );
 
-  return(
-    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:16,padding:28,
-      background:"linear-gradient(160deg,#0D47A1,#1E90FF)"}}>
-      <div style={{fontSize:60,animation:"bounce 0.8s ease-in-out infinite"}}>🎉</div>
-      <div style={{animation:"heroFloat 2s ease-in-out infinite"}}><Fox sz={90} mood="wow"/></div>
-      <div style={{fontSize:28,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",textAlign:"center"}}>
-        Bem-vindo(a), {name}!
+  /* ── CÓDIGO DO FILHO ── */
+  if (step==="codigo_filho") return (
+    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+      gap:16,padding:28,background:"linear-gradient(160deg,#0D47A1,#1E90FF)"}}>
+      <div style={{fontSize:50}}>🎉</div>
+      <div style={{fontSize:24,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",textAlign:"center"}}>
+        Código criado para {filhoNome}!
       </div>
-      <div style={{fontSize:14,color:"#BBDEFB",fontWeight:600,textAlign:"center",lineHeight:1.6}}>
-        Sua aventura começa agora. Boa sorte, {GRADES[grade]}! ⭐
+      <div style={{fontSize:13,color:"#BBDEFB",fontWeight:600,textAlign:"center",lineHeight:1.7}}>
+        Mostre este código para seu filho(a). Ele(a) vai usar para entrar no jogo sem precisar de e-mail!
       </div>
-      <div style={{display:"flex",gap:10,width:"100%"}}>
-        {[{i:"⚡",v:"0 XP"},{i:"🪙",v:"50 bônus"},{i:"🔥",v:"Dia 1"}].map((s,i)=>(
-          <div key={i} style={{flex:1,background:"rgba(255,255,255,0.15)",borderRadius:16,padding:"12px 0",
-            textAlign:"center",border:"2px solid rgba(255,255,255,0.25)"}}>
-            <div style={{fontSize:24}}>{s.i}</div>
-            <div style={{fontSize:14,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>{s.v}</div>
-          </div>
-        ))}
+
+      {/* Código destaque */}
+      <div style={{background:"white",borderRadius:24,padding:"24px 32px",textAlign:"center",
+        boxShadow:`0 8px 32px #00000044`,width:"100%"}}>
+        <div style={{fontSize:11,fontWeight:800,color:"#78716C",textTransform:"uppercase",letterSpacing:2,marginBottom:8}}>
+          Código de acesso de {filhoNome}
+        </div>
+        <div style={{fontSize:42,fontWeight:900,color:"#0D47A1",fontFamily:"'Fredoka One',sans-serif",
+          letterSpacing:4,textShadow:"none"}}>
+          {codigoGerado}
+        </div>
+        <div style={{fontSize:11,color:"#78716C",marginTop:8,fontWeight:600}}>
+          {AVATARS[filhoAvatar]} {GRADES[filhoGrade]} · Guarde este código!
+        </div>
       </div>
-      <button onClick={()=>onDone("map")} style={{width:"100%",padding:16,borderRadius:20,border:"none",
-        background:"white",color:"#0D47A1",fontSize:18,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",
-        cursor:"pointer",boxShadow:"0 6px 24px #00000033"}}>🏠 Ir para o início!</button>
+
+      <div style={{background:"rgba(255,255,255,0.15)",borderRadius:16,padding:"12px 16px",width:"100%",
+        border:"2px solid rgba(255,255,255,0.25)"}}>
+        <div style={{fontSize:12,fontWeight:800,color:"#FFF9C4",marginBottom:4}}>💡 Como funciona:</div>
+        <div style={{fontSize:12,color:"#BBDEFB",fontWeight:600,lineHeight:1.6}}>
+          1. Seu filho(a) abre o MathQuest{"\n"}
+          2. Clica em "Sou Aluno"{"\n"}
+          3. Digita o código <strong style={{color:"white"}}>{codigoGerado}</strong>
+        </div>
+      </div>
+
+      <button onClick={()=>onDone("parent")} style={{width:"100%",padding:16,borderRadius:20,border:"none",
+        background:"white",color:"#0D47A1",fontSize:17,fontWeight:900,
+        fontFamily:"'Fredoka One',sans-serif",cursor:"pointer",
+        boxShadow:"0 6px 24px #00000033"}}>
+        👨‍👩‍👧 Ir para meu painel
+      </button>
     </div>
   );
+
+  return null;
 }
 
-/* ══════════ MAP ══════════ */
+/* ═══════════════════════════════════════
+   MAP SCREEN
+═══════════════════════════════════════ */
 const NODES=[
   {id:1,x:50,y:82,label:"Soma",    icon:"➕",stars:3,state:"done"},
   {id:2,x:72,y:67,label:"Subtração",icon:"➖",stars:2,state:"done"},
@@ -431,6 +568,9 @@ const NODES=[
 ];
 
 function MapScreen({go,toast}){
+  const usuario = Storage.get("mq_usuario_atual");
+  const nomeAluno = usuario?.nome || "Aventureiro";
+
   return(
     <div style={{flex:1,position:"relative",overflow:"hidden"}}>
       <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,#5BB8F5 0%,#ADE4FF 38%,#76C442 60%,#4E8F27 100%)"}}/>
@@ -480,7 +620,7 @@ function MapScreen({go,toast}){
         display:"flex",alignItems:"center",gap:10,boxShadow:"0 8px 24px #00000066"}}>
         <div style={{fontSize:28,animation:"float 2s ease-in-out infinite"}}>⚡</div>
         <div style={{flex:1}}>
-          <div style={{fontSize:13,fontWeight:900,color:C.gold,fontFamily:"'Fredoka One',sans-serif"}}>MISSÃO DO DIA!</div>
+          <div style={{fontSize:13,fontWeight:900,color:C.gold,fontFamily:"'Fredoka One',sans-serif"}}>OLÁ, {nomeAluno.toUpperCase()}!</div>
           <div style={{fontSize:11,color:"#E1BEE7",fontWeight:700}}>Complete 5 desafios · Ganhe 200 moedas</div>
         </div>
         <button onClick={()=>go("quiz")} style={{background:`linear-gradient(135deg,${C.gold},${C.goldDk})`,
@@ -491,7 +631,9 @@ function MapScreen({go,toast}){
   );
 }
 
-/* ══════════ QUIZ ══════════ */
+/* ═══════════════════════════════════════
+   QUIZ SCREEN
+═══════════════════════════════════════ */
 const QUIZ_MODES={
   soma:    {label:"Soma ➕",    color:C.red,   bg:"linear-gradient(180deg,#0A1628,#1a0a0a)"},
   sub:     {label:"Subtração ➖",color:C.orange,bg:"linear-gradient(180deg,#0A1628,#1a0f00)"},
@@ -521,8 +663,27 @@ function QuizScreen({go,toast,showBurst}){
   const startMode=(m)=>{setMode(m);setQ(genQ(m));setQi(0);setSel(null);setDone(false);setHp(3);setXp(0);setEnd(false);};
   const pick=(opt)=>{
     if(sel!==null)return;setSel(opt);setDone(true);
-    if(opt===q.ans){const nx=xp+100;setXp(nx);toast("⚡","+100 XP!","xp");if(nx%300===0){toast("🪙","+50 Moedas!","coin");showBurst();}}
-    else{const nh=hp-1;setHp(nh);toast("❤️","Vida perdida!","info");if(nh<=0)setTimeout(()=>setEnd(true),1200);}
+    if(opt===q.ans){
+      const nx=xp+100;setXp(nx);toast("⚡","+100 XP!","xp");
+      if(nx%300===0){toast("🪙","+50 Moedas!","coin");showBurst();}
+      // Salva XP do aluno
+      const atual = Storage.get("mq_usuario_atual");
+      if(atual?.codigo){
+        const filhos = Storage.get("mq_filhos")||[];
+        const idx = filhos.findIndex(f=>f.codigo===atual.codigo);
+        if(idx>=0){filhos[idx].xp=(filhos[idx].xp||0)+100;filhos[idx].questoes=(filhos[idx].questoes||0)+1;filhos[idx].acertos=(filhos[idx].acertos||0)+1;Storage.set("mq_filhos",filhos);}
+      }
+    } else {
+      const nh=hp-1;setHp(nh);toast("❤️","Vida perdida!","info");
+      if(nh<=0)setTimeout(()=>setEnd(true),1200);
+      // Salva questão errada
+      const atual = Storage.get("mq_usuario_atual");
+      if(atual?.codigo){
+        const filhos = Storage.get("mq_filhos")||[];
+        const idx = filhos.findIndex(f=>f.codigo===atual.codigo);
+        if(idx>=0){filhos[idx].questoes=(filhos[idx].questoes||0)+1;Storage.set("mq_filhos",filhos);}
+      }
+    }
   };
   const next=()=>{if(hp<=0||qi+1>=TOTAL){setEnd(true);return;}setQi(i=>i+1);setQ(genQ(mode));setSel(null);setDone(false);};
 
@@ -533,8 +694,7 @@ function QuizScreen({go,toast,showBurst}){
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,flex:1}}>
         {Object.entries(QUIZ_MODES).map(([k,v])=>(
           <button key={k} onClick={()=>startMode(k)} style={{borderRadius:20,padding:"20px 10px",border:`3px solid ${v.color}44`,
-            background:`${v.color}15`,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:8,
-            boxShadow:`0 4px 16px ${v.color}22`}}>
+            background:`${v.color}15`,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:8}}>
             <div style={{fontSize:36}}>{v.label.split(" ")[1]}</div>
             <div style={{fontSize:14,fontWeight:900,color:v.color,fontFamily:"'Fredoka One',sans-serif"}}>{v.label.split(" ")[0]}</div>
           </button>
@@ -560,7 +720,7 @@ function QuizScreen({go,toast,showBurst}){
       <div style={{display:"flex",gap:10,width:"100%"}}>
         <button onClick={()=>startMode(mode)} style={{flex:1,padding:14,borderRadius:20,border:"none",
           background:`linear-gradient(135deg,${C.blue},${C.blueDk})`,color:"white",fontSize:16,fontWeight:900,
-          fontFamily:"'Fredoka One',sans-serif",cursor:"pointer",boxShadow:`0 5px 0 #003A99`}}>🔄 De novo</button>
+          fontFamily:"'Fredoka One',sans-serif",cursor:"pointer"}}>🔄 De novo</button>
         <button onClick={()=>{setMode(null);go("map");}} style={{flex:1,padding:14,borderRadius:20,
           border:`3px solid ${C.gold}`,background:"transparent",color:C.gold,fontSize:16,fontWeight:900,
           fontFamily:"'Fredoka One',sans-serif",cursor:"pointer"}}>🗺️ Mapa</button>
@@ -607,7 +767,7 @@ function QuizScreen({go,toast,showBurst}){
             padding:"16px 0",background:bg,cursor:done?"default":"pointer",transition:"transform 0.12s",
             transform:isS?"scale(1.06)":"scale(1)",opacity:done&&!isR&&!isS?0.38:1,
             boxShadow:`0 5px 0 ${bd}77,0 8px 20px #00000055`}}>
-            <span style={{fontSize:36,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",textShadow:"0 2px 6px #00000066"}}>{opt}</span>
+            <span style={{fontSize:36,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>{opt}</span>
           </button>);
         })}
       </div>
@@ -620,7 +780,9 @@ function QuizScreen({go,toast,showBurst}){
   );
 }
 
-/* ══════════ SHOP ══════════ */
+/* ═══════════════════════════════════════
+   SHOP, RANK, HERO — mantidos
+═══════════════════════════════════════ */
 const SD={Personagens:[{n:"Max",e:"🦊",p:0,owned:true},{n:"Lia",e:"🧝‍♀️",p:500,owned:false},{n:"Draco",e:"🐲",p:300,owned:true},{n:"Nubi",e:"☁️",p:3,owned:false,gem:true}],Poderes:[{n:"Escudo",e:"🛡️",p:200,owned:false},{n:"Feitiço",e:"🪄",p:150,owned:true},{n:"Relâmp.",e:"⚡",p:2,owned:false,gem:true},{n:"Bomba",e:"💣",p:100,owned:false}],Moedas:[{n:"500 Moedas",e:"🪙",p:"R$1,99",real:true},{n:"1200 Moedas",e:"💰",p:"R$3,99",real:true},{n:"5 Gemas",e:"💎",p:"R$2,49",real:true},{n:"20 Gemas",e:"💎",p:"R$7,99",real:true}]};
 function ShopScreen({toast}){
   const [tab,setTab]=useState("Personagens");
@@ -650,14 +812,13 @@ function ShopScreen({toast}){
   </div>);
 }
 
-/* ══════════ RANK ══════════ */
 const RD={global:[{pos:1,n:"Ana",xp:3250,av:"🧝‍♀️"},{pos:2,n:"Lucas",xp:2800,av:"🦊",me:true},{pos:3,n:"Pedro",xp:2450,av:"🧙"},{pos:4,n:"Sofia",xp:2100,av:"🐲"},{pos:5,n:"Miguel",xp:1900,av:"☁️"}],amigos:[{pos:1,n:"Lucas",xp:2800,av:"🦊",me:true},{pos:2,n:"Ana",xp:2600,av:"🧝‍♀️"},{pos:3,n:"Pedro",xp:1800,av:"🧙"}]};
 function RankScreen(){
   const [tab,setTab]=useState("global");const list=RD[tab];const top3=[list[1],list[0],list[2]].filter(Boolean);const rest=list.slice(3);const pC=["#C0C0C0","#FFD700","#CD7F32"];const pH=[86,110,70];const pM=["🥈","🥇","🥉"];
   return(<div style={{flex:1,display:"flex",flexDirection:"column",background:`linear-gradient(180deg,${C.blueBg},${C.dark})`}}>
-    <div style={{fontSize:24,fontWeight:900,color:C.gold,fontFamily:"'Fredoka One',sans-serif",textAlign:"center",padding:"12px 0 4px",textShadow:`0 0 20px ${C.gold}66`}}>🏆 RANKING</div>
+    <div style={{fontSize:24,fontWeight:900,color:C.gold,fontFamily:"'Fredoka One',sans-serif",textAlign:"center",padding:"12px 0 4px"}}>🏆 RANKING</div>
     <div style={{display:"flex",gap:8,padding:"0 14px 10px"}}>
-      {["global","amigos"].map(k=>(<button key={k} onClick={()=>setTab(k)} style={{flex:1,padding:"7px",borderRadius:20,border:"none",cursor:"pointer",background:tab===k?`linear-gradient(135deg,${C.gold},${C.goldDk})`:"rgba(255,255,255,0.1)",color:tab===k?C.dark:"white",fontSize:13,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",transition:"all 0.2s"}}>{k==="global"?"🌍 Global":"👥 Amigos"}</button>))}
+      {["global","amigos"].map(k=>(<button key={k} onClick={()=>setTab(k)} style={{flex:1,padding:"7px",borderRadius:20,border:"none",cursor:"pointer",background:tab===k?`linear-gradient(135deg,${C.gold},${C.goldDk})`:"rgba(255,255,255,0.1)",color:tab===k?C.dark:"white",fontSize:13,fontWeight:900,fontFamily:"'Fredoka One',sans-serif"}}>{k==="global"?"🌍 Global":"👥 Amigos"}</button>))}
     </div>
     <div style={{display:"flex",alignItems:"flex-end",justifyContent:"center",gap:6,padding:"0 16px 14px"}}>
       {top3.map((p,i)=>(<div key={i} style={{display:"flex",flexDirection:"column",alignItems:"center",flex:1}}>
@@ -680,35 +841,42 @@ function RankScreen(){
   </div>);
 }
 
-/* ══════════ HERO ══════════ */
-function HeroScreen({toast}){
+function HeroScreen(){
+  const usuario = Storage.get("mq_usuario_atual");
+  const filhos = Storage.get("mq_filhos")||[];
+  const filho = filhos.find(f=>f.codigo===usuario?.codigo);
+  const nome = filho?.nome || usuario?.nome || "Aventureiro";
+  const nivel = filho?.nivel || 1;
+  const xp = filho?.xp || 0;
+  const grade = filho?.grade ?? 0;
+  const avatar = filho?.avatar ?? 0;
+
   const [ptab,setPtab]=useState("stats");
   return(<div style={{flex:1,display:"flex",flexDirection:"column",background:`linear-gradient(180deg,${C.blueBg},${C.dark})`,overflowY:"auto"}}>
     <div style={{background:`linear-gradient(135deg,#0033AA,${C.blue})`,padding:"18px 16px 14px",display:"flex",gap:14,alignItems:"center",borderBottom:`3px solid ${C.gold}`}}>
       <div style={{position:"relative"}}>
-        <div style={{width:76,height:76,borderRadius:"50%",background:`linear-gradient(135deg,${C.gold},${C.goldDk})`,border:"4px solid #FFF9C4",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 4px 20px ${C.gold}66`,overflow:"hidden"}}><Fox sz={66}/></div>
-        <div style={{position:"absolute",bottom:-4,right:-4,background:C.orange,borderRadius:"50%",width:26,height:26,border:"2px solid white",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>5</div>
+        <div style={{width:76,height:76,borderRadius:"50%",background:`linear-gradient(135deg,${C.gold},${C.goldDk})`,border:"4px solid #FFF9C4",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 4px 20px ${C.gold}66`,overflow:"hidden",fontSize:44}}>{AVATARS[avatar]}</div>
+        <div style={{position:"absolute",bottom:-4,right:-4,background:C.orange,borderRadius:"50%",width:26,height:26,border:"2px solid white",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>{nivel}</div>
       </div>
       <div style={{flex:1}}>
-        <div style={{fontSize:24,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>Lucas</div>
-        <div style={{fontSize:12,color:"#BBDEFB",fontWeight:700}}>Aventureiro · 3º Ano</div>
+        <div style={{fontSize:24,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>{nome}</div>
+        <div style={{fontSize:12,color:"#BBDEFB",fontWeight:700}}>Aventureiro · {GRADES[grade]}</div>
         <div style={{background:"rgba(0,0,0,0.3)",borderRadius:10,height:10,marginTop:7,overflow:"hidden"}}>
-          <div style={{width:"62%",height:"100%",background:`linear-gradient(90deg,${C.gold},${C.orange})`,borderRadius:10}}/>
+          <div style={{width:`${Math.min((xp%1000)/10,100)}%`,height:"100%",background:`linear-gradient(90deg,${C.gold},${C.orange})`,borderRadius:10}}/>
         </div>
-        <div style={{fontSize:10,color:"#90CAF9",marginTop:3,fontWeight:700}}>1250 / 2000 XP · Nível 6</div>
+        <div style={{fontSize:10,color:"#90CAF9",marginTop:3,fontWeight:700}}>{xp} XP · Nível {nivel}</div>
       </div>
     </div>
     <div style={{display:"flex",borderBottom:"2px solid rgba(255,255,255,0.08)"}}>
-      {[["stats","📊 Stats"],["troféus","🏅 Troféus"],["pets","🐾 Pets"]].map(([k,l])=>(<button key={k} onClick={()=>setPtab(k)} style={{flex:1,padding:"10px 0",border:"none",background:"transparent",cursor:"pointer",borderBottom:`3px solid ${ptab===k?C.gold:"transparent"}`,color:ptab===k?C.gold:"#4A7AB5",fontSize:12,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",transition:"all 0.2s"}}>{l}</button>))}
+      {[["stats","📊 Stats"],["troféus","🏅 Troféus"],["pets","🐾 Pets"]].map(([k,l])=>(<button key={k} onClick={()=>setPtab(k)} style={{flex:1,padding:"10px 0",border:"none",background:"transparent",cursor:"pointer",borderBottom:`3px solid ${ptab===k?C.gold:"transparent"}`,color:ptab===k?C.gold:"#4A7AB5",fontSize:12,fontWeight:900,fontFamily:"'Fredoka One',sans-serif"}}>{l}</button>))}
     </div>
     {ptab==="stats"&&<div style={{padding:12}}>
       <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:14}}>
-        {[{i:"📝",v:"45",l:"Missões",c:C.blue},{i:"🎯",v:"89%",l:"Acertos",c:C.green},{i:"🔥",v:"7 dias",l:"Sequência",c:C.red}].map((s,i)=>(<div key={i} style={{background:"rgba(255,255,255,0.07)",borderRadius:16,padding:"12px 6px",textAlign:"center",border:`2px solid ${s.c}33`}}><div style={{fontSize:22}}>{s.i}</div><div style={{fontSize:17,fontWeight:900,color:s.c,fontFamily:"'Fredoka One',sans-serif"}}>{s.v}</div><div style={{fontSize:9,color:"#90CAF9",fontWeight:700}}>{s.l}</div></div>))}
+        {[{i:"📝",v:filho?.questoes||0,l:"Questões",c:C.blue},{i:"🎯",v:`${filho?.questoes>0?Math.round((filho?.acertos||0)/filho.questoes*100):0}%`,l:"Acertos",c:C.green},{i:"🔥",v:`${filho?.streak||0}d`,l:"Sequência",c:C.red}].map((s,i)=>(<div key={i} style={{background:"rgba(255,255,255,0.07)",borderRadius:16,padding:"12px 6px",textAlign:"center",border:`2px solid ${s.c}33`}}><div style={{fontSize:22}}>{s.i}</div><div style={{fontSize:17,fontWeight:900,color:s.c,fontFamily:"'Fredoka One',sans-serif"}}>{s.v}</div><div style={{fontSize:9,color:"#90CAF9",fontWeight:700}}>{s.l}</div></div>))}
       </div>
-      {[{l:"Soma",p:92,c:C.red},{l:"Subtração",p:76,c:C.orange},{l:"Mult.",p:45,c:C.purple}].map((prog,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}><div style={{width:74,fontSize:12,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>{prog.l}</div><div style={{flex:1,height:10,background:"#060F22",borderRadius:10,overflow:"hidden"}}><div style={{height:"100%",width:`${prog.p}%`,background:prog.c,borderRadius:10}}/></div><div style={{fontSize:11,fontWeight:900,color:prog.c,width:32}}>{prog.p}%</div></div>))}
     </div>}
     {ptab==="troféus"&&<div style={{padding:12,display:"flex",flexWrap:"wrap",gap:8}}>
-      {[{i:"⭐",l:"1ª estrela",ok:true},{i:"🔥",l:"7 dias",ok:true},{i:"⚡",l:"Maratonista",ok:true},{i:"🏆",l:"Top 10",ok:false},{i:"💎",l:"100 questões",ok:false},{i:"🌟",l:"Nota 10",ok:false}].map((b,i)=>(<div key={i} style={{width:82,background:b.ok?"rgba(255,255,255,0.1)":"rgba(255,255,255,0.04)",borderRadius:16,padding:"10px 6px",textAlign:"center",border:b.ok?`2px solid ${C.gold}55`:"2px solid rgba(255,255,255,0.08)",opacity:b.ok?1:0.38}}><div style={{fontSize:30,filter:b.ok?"none":"grayscale(1)"}}>{b.i}</div><div style={{fontSize:9,color:"white",fontWeight:800,marginTop:4,lineHeight:1.3}}>{b.l}</div></div>))}
+      {[{i:"⭐",l:"1ª estrela",ok:(filho?.acertos||0)>=1},{i:"🔥",l:"7 dias",ok:(filho?.streak||0)>=7},{i:"⚡",l:"Maratonista",ok:(filho?.questoes||0)>=50},{i:"🏆",l:"Top 10",ok:false},{i:"💎",l:"100 questões",ok:(filho?.questoes||0)>=100},{i:"🌟",l:"Nota 10",ok:false}].map((b,i)=>(<div key={i} style={{width:82,background:b.ok?"rgba(255,255,255,0.1)":"rgba(255,255,255,0.04)",borderRadius:16,padding:"10px 6px",textAlign:"center",border:b.ok?`2px solid ${C.gold}55`:"2px solid rgba(255,255,255,0.08)",opacity:b.ok?1:0.38}}><div style={{fontSize:30,filter:b.ok?"none":"grayscale(1)"}}>{b.i}</div><div style={{fontSize:9,color:"white",fontWeight:800,marginTop:4,lineHeight:1.3}}>{b.l}</div></div>))}
     </div>}
     {ptab==="pets"&&<div style={{padding:12,display:"flex",flexWrap:"wrap",gap:8}}>
       {[{e:"🦊",n:"Max",active:true},{e:"🐲",n:"Draco",active:false},{e:"🐱",n:"Miau",active:false},{e:"🔒",n:"Bloqueado",locked:true}].map((p,i)=>(<div key={i} style={{width:82,background:p.active?`linear-gradient(135deg,${C.gold},${C.goldDk})`:"rgba(255,255,255,0.07)",borderRadius:16,padding:"12px 8px",textAlign:"center",border:p.active?`3px solid #FFF9C4`:"2px solid rgba(255,255,255,0.12)",opacity:p.locked?0.4:1}}><div style={{fontSize:30}}>{p.e}</div><div style={{fontSize:10,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",color:p.active?C.dark:"white"}}>{p.n}</div>{p.active&&<div style={{fontSize:8,color:C.dark,fontWeight:900}}>ATIVO</div>}</div>))}
@@ -716,80 +884,311 @@ function HeroScreen({toast}){
   </div>);
 }
 
-/* ══════════ PAINEL DOS PAIS ══════════ */
-const CD=[
-  {name:"Sofia",grade:"3º Ano",av:"🦊",level:5,xp:1250,streak:7,accuracy:89,questions:45,time:"4h 12m",subjects:[{l:"Soma",p:92,c:C.red},{l:"Subtração",p:76,c:C.orange},{l:"Mult.",p:45,c:C.purple}],weekly:[45,60,0,80,55,90,30]},
-  {name:"Pedro",grade:"1º Ano",av:"🐯",level:2,xp:210,streak:2,accuracy:72,questions:18,time:"1h 30m",subjects:[{l:"Soma",p:72,c:C.red},{l:"Subtração",p:40,c:C.orange}],weekly:[20,35,10,45,0,60,0]},
-];
-function ParentScreen(){
-  const [child,setChild]=useState(0);const [tab,setTab]=useState("resumo");const [limit,setLimit]=useState(30);const [notif,setNotif]=useState(true);const [weekend,setWeekend]=useState(false);const cd=CD[child];const maxB=Math.max(...cd.weekly);
-  return(<div style={{flex:1,display:"flex",flexDirection:"column",background:"linear-gradient(180deg,#0A1230,#0D1B3E)",overflowY:"auto"}}>
-    <div style={{background:"linear-gradient(135deg,#0D2D6E,#1565C0)",padding:"14px 16px",borderBottom:`3px solid ${C.gold}`}}>
-      <div style={{fontSize:18,fontWeight:900,color:C.gold,fontFamily:"'Fredoka One',sans-serif",marginBottom:10}}>👨‍👩‍👧 Painel dos Pais</div>
-      <div style={{display:"flex",gap:8}}>
-        {CD.map((c,i)=>(<button key={i} onClick={()=>setChild(i)} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",borderRadius:16,cursor:"pointer",transition:"all 0.2s",flex:1,background:child===i?`linear-gradient(135deg,${C.gold},${C.goldDk})`:"rgba(255,255,255,0.1)",color:child===i?C.dark:"white",border:child===i?`2px solid #FFF9C4`:"2px solid rgba(255,255,255,0.15)"}}><span style={{fontSize:22}}>{c.av}</span><div><div style={{fontSize:13,fontWeight:900,fontFamily:"'Fredoka One',sans-serif"}}>{c.name}</div><div style={{fontSize:10,opacity:0.8}}>{c.grade}</div></div></button>))}
-        <button style={{width:44,display:"flex",alignItems:"center",justifyContent:"center",borderRadius:14,border:"2px dashed rgba(255,255,255,0.3)",background:"transparent",color:"rgba(255,255,255,0.5)",fontSize:20,cursor:"pointer"}}>+</button>
+/* ═══════════════════════════════════════
+   PAINEL DOS PAIS — dados reais do filho
+═══════════════════════════════════════ */
+function ParentScreen({ go }) {
+  const usuario  = Storage.get("mq_usuario_atual");
+  const pai      = (Storage.get("mq_pais")||[]).find(p=>p.email===usuario?.email);
+  const todosFilhos = Storage.get("mq_filhos")||[];
+  const meusFilhos  = pai ? todosFilhos.filter(f=>pai.filhos?.includes(f.codigo)) : [];
+
+  const [childIdx, setChildIdx] = useState(0);
+  const [tab, setTab]     = useState("resumo");
+  const [limit, setLimit] = useState(30);
+  const [notif, setNotif] = useState(true);
+  const [addingChild, setAddingChild] = useState(false);
+
+  // Novo filho
+  const [nfNome,  setNfNome]  = useState("");
+  const [nfGrade, setNfGrade] = useState(null);
+  const [nfAvatar,setNfAvatar]= useState(0);
+  const [nfCodigo,setNfCodigo]= useState("");
+
+  const adicionarFilho = () => {
+    if(!nfNome.trim()||nfGrade===null) return;
+    const cod = gerarCodigo(nfNome);
+    const novoFilho = { codigo:cod, nome:nfNome, grade:nfGrade, avatar:nfAvatar,
+      xp:0,nivel:1,streak:0,acertos:0,questoes:0,tempo:"0min",paiEmail:usuario?.email };
+    const filhos = Storage.get("mq_filhos")||[];
+    Storage.set("mq_filhos",[...filhos,novoFilho]);
+    if(pai){pai.filhos=[...(pai.filhos||[]),cod];const pais=Storage.get("mq_pais")||[];Storage.set("mq_pais",[...pais.filter(p=>p.email!==pai.email),pai]);}
+    setNfCodigo(cod); setNfNome(""); setNfGrade(null); setNfAvatar(0);
+  };
+
+  const cd = meusFilhos[childIdx];
+  const acc = cd?.questoes>0 ? Math.round((cd.acertos/cd.questoes)*100) : 0;
+
+  return (
+    <div style={{flex:1,display:"flex",flexDirection:"column",background:"linear-gradient(180deg,#0A1230,#0D1B3E)",overflowY:"auto"}}>
+
+      {/* Header */}
+      <div style={{background:"linear-gradient(135deg,#0D2D6E,#1565C0)",padding:"14px 16px",borderBottom:`3px solid ${C.gold}`}}>
+        <div style={{fontSize:18,fontWeight:900,color:C.gold,fontFamily:"'Fredoka One',sans-serif",marginBottom:10}}>
+          👨‍👩‍👧 Olá, {usuario?.nome || "Pai/Mãe"}!
+        </div>
+
+        {/* Seletor de filhos */}
+        {meusFilhos.length===0 ? (
+          <div style={{background:"rgba(255,255,255,0.1)",borderRadius:16,padding:"12px",textAlign:"center"}}>
+            <div style={{fontSize:13,color:"#90CAF9",fontWeight:600}}>Nenhum filho cadastrado ainda.</div>
+            <button onClick={()=>setAddingChild(true)} style={{marginTop:8,padding:"8px 20px",borderRadius:20,border:"none",
+              background:`linear-gradient(135deg,${C.gold},${C.goldDk})`,color:C.dark,fontSize:13,fontWeight:900,
+              fontFamily:"'Fredoka One',sans-serif",cursor:"pointer"}}>+ Adicionar filho(a)</button>
+          </div>
+        ) : (
+          <div style={{display:"flex",gap:8,overflowX:"auto"}}>
+            {meusFilhos.map((f,i)=>(
+              <button key={i} onClick={()=>setChildIdx(i)} style={{
+                display:"flex",alignItems:"center",gap:8,padding:"8px 14px",
+                borderRadius:16,cursor:"pointer",flexShrink:0,transition:"all 0.2s",
+                background:childIdx===i?`linear-gradient(135deg,${C.gold},${C.goldDk})`:"rgba(255,255,255,0.1)",
+                color:childIdx===i?C.dark:"white",
+                border:childIdx===i?`2px solid #FFF9C4`:"2px solid rgba(255,255,255,0.15)"}}>
+                <span style={{fontSize:22}}>{AVATARS[f.avatar]}</span>
+                <div>
+                  <div style={{fontSize:13,fontWeight:900,fontFamily:"'Fredoka One',sans-serif"}}>{f.nome}</div>
+                  <div style={{fontSize:10,opacity:0.8}}>{GRADES[f.grade]}</div>
+                </div>
+              </button>
+            ))}
+            <button onClick={()=>setAddingChild(true)} style={{
+              display:"flex",alignItems:"center",justifyContent:"center",
+              width:44,borderRadius:14,border:"2px dashed rgba(255,255,255,0.3)",
+              background:"transparent",color:"rgba(255,255,255,0.5)",fontSize:22,cursor:"pointer",flexShrink:0}}>+</button>
+          </div>
+        )}
+      </div>
+
+      {/* Modal adicionar filho */}
+      {addingChild && (
+        <div style={{background:"rgba(0,0,0,0.8)",position:"absolute",inset:0,zIndex:100,
+          display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+          <div style={{background:"#0D1F3C",borderRadius:24,padding:20,width:"100%",border:`2px solid ${C.blue}`}}>
+            <div style={{fontSize:18,fontWeight:900,color:C.gold,fontFamily:"'Fredoka One',sans-serif",marginBottom:14}}>
+              {nfCodigo ? "✅ Filho(a) adicionado!" : "➕ Adicionar filho(a)"}
+            </div>
+
+            {nfCodigo ? (
+              <>
+                <div style={{background:"white",borderRadius:16,padding:"16px",textAlign:"center",marginBottom:14}}>
+                  <div style={{fontSize:11,color:"#78716C",fontWeight:700,marginBottom:6}}>Código de acesso</div>
+                  <div style={{fontSize:36,fontWeight:900,color:"#0D47A1",fontFamily:"'Fredoka One',sans-serif",letterSpacing:4}}>{nfCodigo}</div>
+                  <div style={{fontSize:11,color:"#78716C",marginTop:4}}>Mostre para seu filho(a) usar no app</div>
+                </div>
+                <button onClick={()=>{setAddingChild(false);setNfCodigo("");}} style={{width:"100%",padding:12,borderRadius:16,border:"none",
+                  background:`linear-gradient(135deg,${C.gold},${C.goldDk})`,color:C.dark,fontSize:15,fontWeight:900,
+                  fontFamily:"'Fredoka One',sans-serif",cursor:"pointer"}}>Fechar</button>
+              </>
+            ) : (
+              <>
+                <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                  <input value={nfNome} onChange={e=>setNfNome(e.target.value)} placeholder="Nome do filho(a)"
+                    style={{padding:"12px 14px",borderRadius:12,border:`2px solid rgba(255,255,255,0.1)`,
+                      background:"rgba(255,255,255,0.06)",color:"white",fontSize:15,fontWeight:700,outline:"none"}}/>
+                  <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                    {GRADES.map((g,i)=>(
+                      <button key={i} onClick={()=>setNfGrade(i)} style={{padding:"7px 10px",borderRadius:12,cursor:"pointer",
+                        background:nfGrade===i?`linear-gradient(135deg,${C.blue},${C.blueDk})`:"rgba(255,255,255,0.06)",
+                        color:"white",border:nfGrade===i?`2px solid #90CAF9`:"2px solid rgba(255,255,255,0.1)",
+                        fontSize:11,fontWeight:900,fontFamily:"'Fredoka One',sans-serif"}}>
+                        {["📗","📘","📙","📕","📓"][i]} {g}
+                      </button>
+                    ))}
+                  </div>
+                  <div style={{display:"flex",gap:6}}>
+                    {AVATARS.slice(0,6).map((av,i)=>(
+                      <button key={i} onClick={()=>setNfAvatar(i)} style={{width:44,height:44,borderRadius:12,fontSize:22,cursor:"pointer",
+                        background:nfAvatar===i?`${C.gold}33`:"rgba(255,255,255,0.06)",
+                        border:nfAvatar===i?`2px solid ${C.gold}`:"2px solid rgba(255,255,255,0.1)"}}>{av}</button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{display:"flex",gap:8,marginTop:14}}>
+                  <button onClick={()=>setAddingChild(false)} style={{flex:1,padding:12,borderRadius:16,
+                    border:`2px solid rgba(255,255,255,0.15)`,background:"transparent",
+                    color:"#90CAF9",fontSize:14,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",cursor:"pointer"}}>Cancelar</button>
+                  <button onClick={adicionarFilho} style={{flex:2,padding:12,borderRadius:16,border:"none",
+                    background:nfNome.trim()&&nfGrade!==null?`linear-gradient(135deg,${C.gold},${C.goldDk})`:"rgba(255,255,255,0.1)",
+                    color:nfNome.trim()&&nfGrade!==null?C.dark:"#4A7AB5",fontSize:14,fontWeight:900,
+                    fontFamily:"'Fredoka One',sans-serif",cursor:"pointer"}}>✨ Gerar código</button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Se não tem filho ainda */}
+      {!cd && !addingChild && (
+        <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,padding:24}}>
+          <div style={{fontSize:64}}>👶</div>
+          <div style={{fontSize:18,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",textAlign:"center"}}>
+            Adicione seu primeiro filho(a)
+          </div>
+          <div style={{fontSize:13,color:"#90CAF9",fontWeight:600,textAlign:"center"}}>
+            Cadastre seu filho para acompanhar o progresso dele
+          </div>
+          <button onClick={()=>setAddingChild(true)} style={{padding:"14px 32px",borderRadius:20,border:"none",
+            background:`linear-gradient(135deg,${C.gold},${C.goldDk})`,color:C.dark,fontSize:16,fontWeight:900,
+            fontFamily:"'Fredoka One',sans-serif",cursor:"pointer",boxShadow:`0 5px 0 #B86000`}}>
+            + Adicionar filho(a)
+          </button>
+        </div>
+      )}
+
+      {/* Dados do filho selecionado */}
+      {cd && <>
+        {/* Quick stats */}
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:0,padding:"10px 12px 8px"}}>
+          {[{i:"⚡",v:`Nv.${cd.nivel||1}`,l:"Nível",c:C.purple},
+            {i:"🔥",v:`${cd.streak||0}d`,l:"Streak",c:C.red},
+            {i:"🎯",v:`${acc}%`,l:"Acertos",c:C.green},
+            {i:"📝",v:cd.questoes||0,l:"Questões",c:C.blue}].map((s,i)=>(
+            <div key={i} style={{background:`${s.c}18`,borderRadius:14,padding:"10px 4px",textAlign:"center",margin:3,border:`2px solid ${s.c}33`}}>
+              <div style={{fontSize:18}}>{s.i}</div>
+              <div style={{fontSize:14,fontWeight:900,color:s.c,fontFamily:"'Fredoka One',sans-serif"}}>{s.v}</div>
+              <div style={{fontSize:9,color:"#90CAF9",fontWeight:700}}>{s.l}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Código de acesso do filho */}
+        <div style={{margin:"0 12px 8px",background:"rgba(255,215,0,0.1)",borderRadius:14,
+          padding:"10px 14px",border:`1px solid ${C.gold}44`,
+          display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div>
+            <div style={{fontSize:11,color:C.gold,fontWeight:800}}>🔑 Código de {cd.nome}</div>
+            <div style={{fontSize:18,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",letterSpacing:3}}>{cd.codigo}</div>
+          </div>
+          <div style={{fontSize:11,color:"#90CAF9",fontWeight:600,textAlign:"right"}}>
+            {AVATARS[cd.avatar]} {GRADES[cd.grade]}
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div style={{display:"flex",borderBottom:"2px solid rgba(255,255,255,0.08)"}}>
+          {[["resumo","📊 Resumo"],["atividade","📋 Atividade"],["controles","⚙️ Controles"]].map(([k,l])=>(
+            <button key={k} onClick={()=>setTab(k)} style={{flex:1,padding:"10px 0",border:"none",background:"transparent",cursor:"pointer",
+              borderBottom:`3px solid ${tab===k?C.gold:"transparent"}`,color:tab===k?C.gold:"#4A7AB5",
+              fontSize:11,fontWeight:900,fontFamily:"'Fredoka One',sans-serif"}}>
+              {l}
+            </button>
+          ))}
+        </div>
+
+        <div style={{padding:"12px 12px 80px"}}>
+          {tab==="resumo" && <>
+            {cd.questoes===0 ? (
+              <div style={{textAlign:"center",padding:"32px 16px"}}>
+                <div style={{fontSize:48}}>🎮</div>
+                <div style={{fontSize:16,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",marginTop:10}}>{cd.nome} ainda não jogou!</div>
+                <div style={{fontSize:12,color:"#90CAF9",fontWeight:600,marginTop:6}}>Compartilhe o código <strong style={{color:C.gold}}>{cd.codigo}</strong> para ele(a) começar</div>
+              </div>
+            ) : (
+              <>
+                <div style={{fontSize:13,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",marginBottom:10}}>📊 Desempenho geral</div>
+                <div style={{background:"rgba(255,255,255,0.05)",borderRadius:16,padding:"14px",marginBottom:14}}>
+                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+                    <span style={{fontSize:12,color:"#90CAF9",fontWeight:700}}>Taxa de acertos</span>
+                    <span style={{fontSize:12,fontWeight:900,color:acc>=70?C.green:C.red}}>{acc}%</span>
+                  </div>
+                  <div style={{height:10,background:"rgba(255,255,255,0.1)",borderRadius:10,overflow:"hidden"}}>
+                    <div style={{height:"100%",width:`${acc}%`,background:acc>=70?C.green:C.red,borderRadius:10,transition:"width 0.8s"}}/>
+                  </div>
+                  <div style={{fontSize:11,color:"#90CAF9",marginTop:6,fontWeight:600}}>
+                    {cd.acertos} acertos em {cd.questoes} questões
+                  </div>
+                </div>
+                <div style={{background:"rgba(46,204,113,0.12)",border:"1px solid rgba(46,204,113,0.3)",
+                  borderRadius:14,padding:"12px 14px",display:"flex",gap:10}}>
+                  <span style={{fontSize:22}}>💡</span>
+                  <div>
+                    <div style={{fontSize:13,fontWeight:900,color:C.green,fontFamily:"'Fredoka One',sans-serif"}}>
+                      {acc>=80?"Ótimo desempenho!":acc>=60?"Bom progresso!":"Precisa de atenção"}
+                    </div>
+                    <div style={{fontSize:12,color:"#A7F3D0",fontWeight:600}}>
+                      {cd.nome} completou {cd.questoes} questões com {acc}% de aproveitamento.
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </>}
+
+          {tab==="atividade" && (
+            <div style={{textAlign:"center",padding:"24px 0"}}>
+              <div style={{fontSize:40}}>📋</div>
+              <div style={{fontSize:15,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",marginTop:8}}>
+                {cd.questoes>0 ? `${cd.questoes} questões respondidas` : "Nenhuma atividade ainda"}
+              </div>
+              <div style={{fontSize:12,color:"#90CAF9",marginTop:6,fontWeight:600}}>
+                {cd.questoes>0 ? `${cd.acertos} acertos · ${cd.questoes-cd.acertos} erros` : "Compartilhe o código para começar"}
+              </div>
+            </div>
+          )}
+
+          {tab==="controles" && <>
+            <div style={{background:"rgba(255,255,255,0.05)",borderRadius:16,padding:"14px 16px",marginBottom:12}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                <div>
+                  <div style={{fontSize:13,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>⏱️ Limite diário</div>
+                  <div style={{fontSize:11,color:"#90CAF9",fontWeight:600}}>Máximo por dia</div>
+                </div>
+                <div style={{fontSize:20,fontWeight:900,color:C.gold,fontFamily:"'Fredoka One',sans-serif",
+                  background:`${C.gold}18`,padding:"4px 14px",borderRadius:12}}>{limit} min</div>
+              </div>
+              <input type="range" min={10} max={120} step={5} value={limit}
+                onChange={e=>setLimit(+e.target.value)} style={{width:"100%",accentColor:C.blue}}/>
+            </div>
+            <div style={{background:"rgba(255,255,255,0.05)",borderRadius:16,padding:"14px 16px"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <div>
+                  <div style={{fontSize:13,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>🔔 Alertas de inatividade</div>
+                  <div style={{fontSize:10,color:"#90CAF9",fontWeight:600}}>Aviso após 3 dias parado</div>
+                </div>
+                <button onClick={()=>setNotif(v=>!v)} style={{width:46,height:26,borderRadius:13,border:"none",cursor:"pointer",
+                  background:notif?C.blue:"rgba(255,255,255,0.15)",display:"flex",alignItems:"center",
+                  padding:3,justifyContent:notif?"flex-end":"flex-start",transition:"all 0.25s"}}>
+                  <div style={{width:20,height:20,borderRadius:"50%",background:"white"}}/>
+                </button>
+              </div>
+            </div>
+          </>}
+        </div>
+      </>}
+
+      {/* Botão voltar */}
+      <div style={{position:"sticky",bottom:0,padding:"10px 12px",
+        background:"linear-gradient(180deg,transparent,#0A1230)",borderTop:"1px solid rgba(255,255,255,0.05)"}}>
+        <button onClick={()=>{Storage.set("mq_usuario_atual",null);go("login");}} style={{
+          width:"100%",padding:11,borderRadius:16,
+          border:`2px solid rgba(255,255,255,0.15)`,background:"transparent",
+          color:"#90CAF9",fontSize:13,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",cursor:"pointer"}}>
+          🚪 Sair da conta
+        </button>
       </div>
     </div>
-    <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:0,padding:"10px 12px 8px"}}>
-      {[{i:"⚡",v:`Nv.${cd.level}`,l:"Nível",c:C.purple},{i:"🔥",v:`${cd.streak}d`,l:"Streak",c:C.red},{i:"🎯",v:`${cd.accuracy}%`,l:"Acertos",c:C.green},{i:"⏱️",v:cd.time,l:"Tempo",c:C.blue}].map((s,i)=>(<div key={i} style={{background:`${s.c}18`,borderRadius:14,padding:"10px 4px",textAlign:"center",margin:3,border:`2px solid ${s.c}33`}}><div style={{fontSize:18}}>{s.i}</div><div style={{fontSize:14,fontWeight:900,color:s.c,fontFamily:"'Fredoka One',sans-serif"}}>{s.v}</div><div style={{fontSize:9,color:"#90CAF9",fontWeight:700}}>{s.l}</div></div>))}
-    </div>
-    <div style={{display:"flex",borderBottom:"2px solid rgba(255,255,255,0.08)"}}>
-      {[["resumo","📊 Resumo"],["atividade","📋 Atividade"],["controles","⚙️ Controles"]].map(([k,l])=>(<button key={k} onClick={()=>setTab(k)} style={{flex:1,padding:"10px 0",border:"none",background:"transparent",cursor:"pointer",borderBottom:`3px solid ${tab===k?C.gold:"transparent"}`,color:tab===k?C.gold:"#4A7AB5",fontSize:11,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",transition:"all 0.2s"}}>{l}</button>))}
-    </div>
-    <div style={{padding:"12px 12px 80px"}}>
-      {tab==="resumo"&&<>
-        <div style={{fontSize:13,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",marginBottom:10}}>📅 Tempo de estudo (min)</div>
-        <div style={{background:"rgba(255,255,255,0.05)",borderRadius:16,padding:"14px 10px",marginBottom:14,border:"1px solid rgba(255,255,255,0.08)"}}>
-          <div style={{display:"flex",gap:4,alignItems:"flex-end",height:80}}>
-            {cd.weekly.map((v,i)=>(<div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
-              <div style={{fontSize:8,color:"#90CAF9",fontWeight:700,height:14}}>{v>0?v:""}</div>
-              <div style={{width:"100%",flex:1,background:"rgba(255,255,255,0.06)",borderRadius:4,display:"flex",alignItems:"flex-end",overflow:"hidden"}}><div style={{width:"100%",height:`${maxB>0?(v/maxB)*100:0}%`,background:v>0?`linear-gradient(180deg,${C.blue},${C.blueDk})`:"transparent",borderRadius:4,transition:"height 0.6s"}}/></div>
-              <div style={{fontSize:9,color:"#4A7AB5",fontWeight:700}}>{["D","S","T","Q","Q","S","S"][i]}</div>
-            </div>))}
-          </div>
-        </div>
-        <div style={{fontSize:13,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",marginBottom:10}}>📚 Progresso por matéria</div>
-        {cd.subjects.map((s,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}><div style={{width:80,fontSize:12,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>{s.l}</div><div style={{flex:1,height:10,background:"rgba(255,255,255,0.08)",borderRadius:10,overflow:"hidden"}}><div style={{height:"100%",width:`${s.p}%`,background:s.c,borderRadius:10}}/></div><div style={{fontSize:12,fontWeight:900,color:s.c,width:36}}>{s.p}%</div></div>))}
-        <div style={{background:"rgba(46,204,113,0.12)",border:"1px solid rgba(46,204,113,0.3)",borderRadius:14,padding:"12px 14px",marginTop:4,display:"flex",gap:10}}><span style={{fontSize:22}}>💡</span><div><div style={{fontSize:13,fontWeight:900,color:C.green,fontFamily:"'Fredoka One',sans-serif"}}>Ótima semana!</div><div style={{fontSize:12,color:"#A7F3D0",fontWeight:600}}>{cd.name} estudou 5 dos últimos 7 dias!</div></div></div>
-      </>}
-      {tab==="atividade"&&<>
-        <div style={{fontSize:13,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",marginBottom:10}}>📋 Sessões recentes</div>
-        {[{date:"Hoje",dur:"55 min",q:32,acc:"89%",medal:"🥇"},{date:"Ontem",dur:"40 min",q:22,acc:"77%",medal:"🥈"},{date:"Sexta",dur:"1h 20min",q:48,acc:"91%",medal:"🥇"}].map((s,i)=>(<div key={i} style={{background:"rgba(255,255,255,0.06)",borderRadius:16,padding:"14px",marginBottom:10,border:"1px solid rgba(255,255,255,0.08)"}}>
-          <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><div style={{fontSize:14,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>{s.date}</div><span style={{fontSize:20}}>{s.medal}</span></div>
-          <div style={{display:"flex",gap:14}}><span style={{fontSize:12,color:"#90CAF9",fontWeight:700}}>⏱️ {s.dur}</span><span style={{fontSize:12,color:"#90CAF9",fontWeight:700}}>📝 {s.q} questões</span><span style={{fontSize:12,color:C.green,fontWeight:800}}>✅ {s.acc}</span></div>
-        </div>))}
-      </>}
-      {tab==="controles"&&<>
-        <div style={{background:"rgba(255,255,255,0.05)",borderRadius:16,padding:"14px 16px",marginBottom:12,border:"1px solid rgba(255,255,255,0.08)"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-            <div><div style={{fontSize:13,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>⏱️ Limite diário</div><div style={{fontSize:11,color:"#90CAF9",fontWeight:600}}>Máximo por dia</div></div>
-            <div style={{fontSize:22,fontWeight:900,color:C.gold,fontFamily:"'Fredoka One',sans-serif",background:`${C.gold}18`,padding:"4px 14px",borderRadius:12,border:`1px solid ${C.gold}44`}}>{limit} min</div>
-          </div>
-          <input type="range" min={10} max={120} step={5} value={limit} onChange={e=>setLimit(+e.target.value)} style={{width:"100%",accentColor:C.blue}}/>
-        </div>
-        <div style={{background:"rgba(255,255,255,0.05)",borderRadius:16,padding:"14px 16px",marginBottom:12,border:"1px solid rgba(255,255,255,0.08)"}}>
-          {[{l:"Alertas de inatividade",s:"Aviso após 3 dias parado",v:notif,set:setNotif},{l:"Dobrar limite no fim de semana",s:`Máximo ${limit*2} min`,v:weekend,set:setWeekend}].map((t,i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:i===0?"1px solid rgba(255,255,255,0.06)":"none"}}>
-            <div><div style={{fontSize:13,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>{t.l}</div><div style={{fontSize:10,color:"#90CAF9",fontWeight:600}}>{t.s}</div></div>
-            <button onClick={()=>t.set(v=>!v)} style={{width:46,height:26,borderRadius:13,border:"none",cursor:"pointer",background:t.v?C.blue:"rgba(255,255,255,0.15)",display:"flex",alignItems:"center",padding:3,justifyContent:t.v?"flex-end":"flex-start",transition:"all 0.25s"}}><div style={{width:20,height:20,borderRadius:"50%",background:"white",boxShadow:"0 1px 4px #00000033"}}/></button>
-          </div>))}
-        </div>
-        <button style={{width:"100%",padding:13,borderRadius:14,border:"none",background:`linear-gradient(135deg,${C.blue},${C.blueDk})`,color:"white",fontSize:14,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",cursor:"pointer",marginBottom:8}}>📄 Exportar relatório</button>
-        <button style={{width:"100%",padding:13,borderRadius:14,border:`2px solid rgba(255,255,255,0.15)`,background:"transparent",color:"#90CAF9",fontSize:14,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",cursor:"pointer"}}>📧 Enviar por e-mail</button>
-      </>}
-    </div>
-  </div>);
+  );
 }
 
-/* ══════════ ROOT ══════════ */
+/* ═══════════════════════════════════════
+   ROOT APP
+═══════════════════════════════════════ */
 const NAV=[{k:"map",i:"🗺️",l:"Mapa"},{k:"quiz",i:"⚔️",l:"Missão"},{k:"shop",i:"🏪",l:"Loja"},{k:"rank",i:"🏆",l:"Rank"},{k:"hero",i:"🦊",l:"Herói"}];
 
 export default function App(){
-  const [screen,setScreen]=useState("login");
   const [burst,setBurst]=useState(false);
   const {toasts,show}=useToast();
-  const [returning,setReturning]=useState(false);
-  const go=s=>{if(s==="login"){setReturning(true);}setScreen(s);};
+
+  // Verifica se já tem sessão salva
+  const sessaoAtual = Storage.get("mq_usuario_atual");
+  const telaInicial = sessaoAtual?.tipo==="pai" ? "parent"
+                    : sessaoAtual?.tipo==="aluno" ? "map"
+                    : "login";
+
+  const [screen,setScreen]=useState(telaInicial);
+  const go=s=>setScreen(s);
   const isInApp=!["login"].includes(screen);
 
   return(
@@ -821,13 +1220,13 @@ export default function App(){
         <RewardBurst show={burst} onDone={()=>setBurst(false)}/>
         <Toast toasts={toasts}/>
 
-        {isInApp&&<div style={{background:C.dark,padding:"10px 22px 5px",display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:11,color:"#90CAF9",fontFamily:"'Nunito',sans-serif",fontWeight:800}}>
+        {isInApp&&screen!=="parent"&&<div style={{background:C.dark,padding:"10px 22px 5px",display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:11,color:"#90CAF9",fontFamily:"'Nunito',sans-serif",fontWeight:800}}>
           <span>9:41</span>
           <div style={{display:"flex",alignItems:"center",gap:6}}><Logo s={18}/><span style={{fontFamily:"'Fredoka One',sans-serif",color:C.gold,fontSize:14}}>Math<span style={{color:C.blue}}>Quest</span></span></div>
-          <span>🔋 100%</span>
+          <span>🔋</span>
         </div>}
 
-        {isInApp&&<div style={{display:"flex",alignItems:"center",gap:6,padding:"6px 12px 8px",background:`linear-gradient(180deg,#0A1628,${C.card})`,borderBottom:`3px solid ${C.gold}`}}>
+        {isInApp&&screen!=="parent"&&<div style={{display:"flex",alignItems:"center",gap:6,padding:"6px 12px 8px",background:`linear-gradient(180deg,#0A1628,${C.card})`,borderBottom:`3px solid ${C.gold}`}}>
           <div style={{flex:1,height:13,background:"#050C1A",borderRadius:20,border:`2px solid rgba(30,144,255,0.2)`,overflow:"hidden",position:"relative"}}>
             <div style={{position:"absolute",inset:0,width:"63%",background:`linear-gradient(90deg,${C.green},#1B8A3A)`,borderRadius:20}}/>
             <span style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",zIndex:1}}>Nv.5 · 1250 XP</span>
@@ -838,19 +1237,25 @@ export default function App(){
         </div>}
 
         <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
-          {screen==="login" &&<LoginScreen onDone={go} returning={returning}/>}
-          {screen==="map"   &&<MapScreen   go={go} toast={show}/>}
-          {screen==="quiz"  &&<QuizScreen  go={go} toast={show} showBurst={()=>setBurst(true)}/>}
-          {screen==="shop"  &&<ShopScreen  toast={show}/>}
-          {screen==="rank"  &&<RankScreen/>}
-          {screen==="hero"  &&<HeroScreen  toast={show}/>}
-          {screen==="parent"&&<ParentScreen/>}
+          {screen==="login"  && <LoginScreen onDone={go}/>}
+          {screen==="map"    && <MapScreen   go={go} toast={show}/>}
+          {screen==="quiz"   && <QuizScreen  go={go} toast={show} showBurst={()=>setBurst(true)}/>}
+          {screen==="shop"   && <ShopScreen  toast={show}/>}
+          {screen==="rank"   && <RankScreen/>}
+          {screen==="hero"   && <HeroScreen/>}
+          {screen==="parent" && <ParentScreen go={go}/>}
         </div>
 
-        {isInApp&&screen!=="parent"&&<div style={{display:"flex",background:`linear-gradient(180deg,#050C1A,#0A1628)`,borderTop:`3px solid ${C.gold}`}}>
-          {NAV.map(item=>{const active=screen===item.k;return(<button key={item.k} onClick={()=>go(item.k)} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2,padding:"8px 0 6px",border:"none",background:active?`linear-gradient(180deg,${C.gold},${C.goldDk})`:"transparent",borderTop:active?`3px solid #FFF9C4`:"3px solid transparent",cursor:"pointer",transition:"all 0.18s"}}><span style={{fontSize:22}}>{item.i}</span><span style={{fontSize:10,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",color:active?C.dark:"#4A7AB5"}}>{item.l}</span></button>);})}
-        </div>}
-        {screen==="parent"&&<button onClick={()=>go("map")} style={{padding:"12px 0",background:`linear-gradient(180deg,#050C1A,#0A1628)`,borderTop:`3px solid ${C.gold}`,border:"none",color:C.gold,fontSize:14,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",cursor:"pointer"}}>◀ Voltar ao app</button>}
+        {isInApp&&screen!=="parent"&&(
+          <div style={{display:"flex",background:`linear-gradient(180deg,#050C1A,#0A1628)`,borderTop:`3px solid ${C.gold}`}}>
+            {NAV.map(item=>{const active=screen===item.k;return(
+              <button key={item.k} onClick={()=>go(item.k)} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2,padding:"8px 0 6px",border:"none",background:active?`linear-gradient(180deg,${C.gold},${C.goldDk})`:"transparent",borderTop:active?`3px solid #FFF9C4`:"3px solid transparent",cursor:"pointer",transition:"all 0.18s"}}>
+                <span style={{fontSize:22}}>{item.i}</span>
+                <span style={{fontSize:10,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",color:active?C.dark:"#4A7AB5"}}>{item.l}</span>
+              </button>
+            );})}
+          </div>
+        )}
       </div>
     </div>
   );
