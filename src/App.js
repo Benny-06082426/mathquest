@@ -143,6 +143,102 @@ function RewardBurst({show:visible,onDone}){
 const AVATARS=["🦊","🐯","🐰","🐻","🦁","🐸","🧙","🧝‍♀️"];
 const GRADES=["1º Ano","2º Ano","3º Ano","4º Ano","5º Ano"];
 
+/* ═══════════════════════════════════════
+   CODIGO CARD — reutilizável com botão copiar
+═══════════════════════════════════════ */
+function CodigoCard({ codigo, nome, grade, avatar }) {
+  const [copiado, setCopiado] = useState(false);
+  const [compartilhado, setCompartilhado] = useState(false);
+
+  const copiar = () => {
+    try {
+      navigator.clipboard.writeText(codigo);
+    } catch {
+      // fallback para dispositivos que bloqueiam clipboard
+      const el = document.createElement("textarea");
+      el.value = codigo;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+    }
+    setCopiado(true);
+    setTimeout(() => setCopiado(false), 2500);
+  };
+
+  const compartilhar = () => {
+    const texto = `🦊 MathQuest\n\nOlá! Seu código de acesso é:\n\n${codigo}\n\nAbra o app, clique em "Sou Aluno" e digite esse código para começar a jogar! 🎮`;
+    if (navigator.share) {
+      navigator.share({ title: "MathQuest - Código de acesso", text: texto })
+        .then(() => setCompartilhado(true))
+        .catch(() => {});
+    } else {
+      copiar();
+    }
+  };
+
+  return (
+    <div style={{background:"white",borderRadius:24,padding:"20px 24px",textAlign:"center",
+      boxShadow:"0 8px 32px #00000044",width:"100%"}}>
+      <div style={{fontSize:11,fontWeight:800,color:"#78716C",textTransform:"uppercase",
+        letterSpacing:2,marginBottom:4}}>
+        Código de acesso de {nome}
+      </div>
+      {grade!==null && avatar!==undefined && (
+        <div style={{fontSize:11,color:"#A78BFA",fontWeight:700,marginBottom:10}}>
+          {AVATARS[avatar]} {GRADES[grade]}
+        </div>
+      )}
+
+      {/* Código em destaque */}
+      <div style={{background:"linear-gradient(135deg,#EDE9FE,#DDD6FE)",borderRadius:16,
+        padding:"16px 20px",marginBottom:14,position:"relative"}}>
+        <div style={{fontSize:38,fontWeight:900,color:"#0D47A1",
+          fontFamily:"'Fredoka One',sans-serif",letterSpacing:6}}>
+          {codigo}
+        </div>
+      </div>
+
+      {/* Botões de ação */}
+      <div style={{display:"flex",gap:8}}>
+        {/* Copiar */}
+        <button onClick={copiar} style={{
+          flex:1, padding:"12px 0", borderRadius:16, border:"none", cursor:"pointer",
+          background: copiado
+            ? "linear-gradient(135deg,#2ECC71,#1B8A3A)"
+            : "linear-gradient(135deg,#1E90FF,#0055CC)",
+          color:"white", fontSize:13, fontWeight:900,
+          fontFamily:"'Fredoka One',sans-serif",
+          boxShadow: copiado ? "0 4px 14px #2ECC7144" : "0 4px 14px #1E90FF44",
+          transition:"all 0.25s",
+          display:"flex", alignItems:"center", justifyContent:"center", gap:6,
+        }}>
+          <span style={{fontSize:16}}>{copiado ? "✅" : "📋"}</span>
+          {copiado ? "Copiado!" : "Copiar código"}
+        </button>
+
+        {/* Compartilhar via WhatsApp / etc */}
+        <button onClick={compartilhar} style={{
+          flex:1, padding:"12px 0", borderRadius:16, border:"none", cursor:"pointer",
+          background:"linear-gradient(135deg,#25D366,#128C7E)",
+          color:"white", fontSize:13, fontWeight:900,
+          fontFamily:"'Fredoka One',sans-serif",
+          boxShadow:"0 4px 14px #25D36644",
+          display:"flex", alignItems:"center", justifyContent:"center", gap:6,
+        }}>
+          <span style={{fontSize:16}}>📤</span>
+          Compartilhar
+        </button>
+      </div>
+
+      <div style={{fontSize:11,color:"#78716C",marginTop:10,fontWeight:600,lineHeight:1.5}}>
+        Envie esse código para {nome} usar no app.<br/>
+        <strong>Não compartilhe com outras pessoas.</strong>
+      </div>
+    </div>
+  );
+}
+
 /* ═══════════════════════════════════════════════════
    LOGIN / ONBOARDING
    - Aluno: usa CÓDIGO gerado pelo pai (sem e-mail)
@@ -519,19 +615,7 @@ function LoginScreen({ onDone }) {
       </div>
 
       {/* Código destaque */}
-      <div style={{background:"white",borderRadius:24,padding:"24px 32px",textAlign:"center",
-        boxShadow:`0 8px 32px #00000044`,width:"100%"}}>
-        <div style={{fontSize:11,fontWeight:800,color:"#78716C",textTransform:"uppercase",letterSpacing:2,marginBottom:8}}>
-          Código de acesso de {filhoNome}
-        </div>
-        <div style={{fontSize:42,fontWeight:900,color:"#0D47A1",fontFamily:"'Fredoka One',sans-serif",
-          letterSpacing:4,textShadow:"none"}}>
-          {codigoGerado}
-        </div>
-        <div style={{fontSize:11,color:"#78716C",marginTop:8,fontWeight:600}}>
-          {AVATARS[filhoAvatar]} {GRADES[filhoGrade]} · Guarde este código!
-        </div>
-      </div>
+      <CodigoCard codigo={codigoGerado} nome={filhoNome} grade={filhoGrade} avatar={filhoAvatar}/>
 
       <div style={{background:"rgba(255,255,255,0.15)",borderRadius:16,padding:"12px 16px",width:"100%",
         border:"2px solid rgba(255,255,255,0.25)"}}>
@@ -1412,12 +1496,8 @@ function ParentScreen({ go }) {
 
             {nfCodigo ? (
               <>
-                <div style={{background:"white",borderRadius:16,padding:"16px",textAlign:"center",marginBottom:14}}>
-                  <div style={{fontSize:11,color:"#78716C",fontWeight:700,marginBottom:6}}>Código de acesso</div>
-                  <div style={{fontSize:36,fontWeight:900,color:"#0D47A1",fontFamily:"'Fredoka One',sans-serif",letterSpacing:4}}>{nfCodigo}</div>
-                  <div style={{fontSize:11,color:"#78716C",marginTop:4}}>Mostre para seu filho(a) usar no app</div>
-                </div>
-                <button onClick={()=>{setAddingChild(false);setNfCodigo("");}} style={{width:"100%",padding:12,borderRadius:16,border:"none",
+                <CodigoCard codigo={nfCodigo} nome={nfNome||"filho(a)"} grade={nfGrade} avatar={nfAvatar}/>
+                <button onClick={()=>{setAddingChild(false);setNfCodigo("");}} style={{width:"100%",padding:12,borderRadius:16,border:"none",marginTop:8,
                   background:`linear-gradient(135deg,${C.gold},${C.goldDk})`,color:C.dark,fontSize:15,fontWeight:900,
                   fontFamily:"'Fredoka One',sans-serif",cursor:"pointer"}}>Fechar</button>
               </>
