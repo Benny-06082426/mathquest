@@ -258,9 +258,11 @@ function LoginScreen({onDone, returning}){
       background:"linear-gradient(180deg,#0A1628,#0D1F3C)"}}>
       <div style={{fontSize:11,fontWeight:800,color:"#4A7AB5",textTransform:"uppercase",letterSpacing:2}}>Passo 2 de 3</div>
       <div style={{display:"flex",gap:5}}>{[0,1,2].map(i=><div key={i} style={{width:32,height:6,borderRadius:10,background:i<=1?C.gold:"rgba(255,255,255,0.15)"}}/>)}</div>
-      <div style={{fontSize:52,animation:"heroFloat 2s ease-in-out infinite"}}>{AVATARS[avatar]}</div>
+      <div style={{fontSize:52,animation:"heroFloat 2s ease-in-out infinite"}}>{mode==="pai"?"👨‍👩‍👧":AVATARS[avatar]}</div>
       <div style={{fontSize:22,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>Qual é o seu nome?</div>
-      <input value={name} onChange={e=>setName(e.target.value)} placeholder="Digite seu nome..."
+      <div style={{fontSize:13,color:"#90CAF9",fontWeight:600}}>{mode==="pai"?"Como devemos te chamar? 👋":"Como vamos te chamar na aventura? 🏷️"}</div>
+      <input value={name} onChange={e=>setName(e.target.value)}
+        placeholder={mode==="pai"?"Seu nome...":"Digite seu nome..."}
         style={{width:"100%",padding:"16px 20px",borderRadius:16,textAlign:"center",
           border:`3px solid ${name?C.gold:"rgba(255,255,255,0.1)"}`,
           background:"rgba(255,255,255,0.06)",fontSize:20,fontWeight:900,
@@ -268,15 +270,66 @@ function LoginScreen({onDone, returning}){
       {name.length>0&&(
         <div style={{display:"flex",alignItems:"center",gap:10,background:`${C.gold}18`,
           border:`2px solid ${C.gold}44`,borderRadius:16,padding:"10px 20px",width:"100%"}}>
-          <span style={{fontSize:28}}>{AVATARS[avatar]}</span>
-          <span style={{fontWeight:900,fontSize:16,color:C.gold,fontFamily:"'Fredoka One',sans-serif"}}>Olá, {name}! 👋</span>
+          <span style={{fontSize:28}}>{mode==="pai"?"👨‍👩‍👧":AVATARS[avatar]}</span>
+          <span style={{fontWeight:900,fontSize:16,color:C.gold,fontFamily:"'Fredoka One',sans-serif"}}>
+            {mode==="pai"?`Olá, ${name}! Vamos acompanhar seus filhos 👶`:`Olá, ${name}! 👋`}
+          </span>
         </div>
       )}
-      <button onClick={()=>name.trim()&&setStep("grade")} style={{width:"100%",padding:15,borderRadius:20,border:"none",marginTop:"auto",
+      <button onClick={()=>name.trim()&&setStep(mode==="pai"?"addchild":"grade")} style={{width:"100%",padding:15,borderRadius:20,border:"none",marginTop:"auto",
         background:name.trim()?`linear-gradient(135deg,${C.gold},${C.goldDk})`:"rgba(255,255,255,0.1)",
         color:name.trim()?C.dark:"#4A7AB5",fontSize:17,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",
         cursor:name.trim()?"pointer":"not-allowed",boxShadow:name.trim()?`0 5px 0 #B86000`:"none",
         transition:"all 0.2s"}}>Próximo →</button>
+    </div>
+  );
+
+  if(step==="addchild") return(
+    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",padding:"24px 24px 32px",gap:14,
+      background:"linear-gradient(180deg,#0A1628,#0D1F3C)",overflowY:"auto"}}>
+      <div style={{fontSize:11,fontWeight:800,color:"#4A7AB5",textTransform:"uppercase",letterSpacing:2}}>Passo 3 de 3</div>
+      <div style={{display:"flex",gap:5}}>{[0,1,2].map(i=><div key={i} style={{width:32,height:6,borderRadius:10,background:C.gold}}/>)}</div>
+      <div style={{fontSize:48,animation:"heroFloat 2s ease-in-out infinite"}}>👶</div>
+      <div style={{fontSize:22,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",textAlign:"center"}}>Adicione seu filho(a)</div>
+      <div style={{fontSize:13,color:"#90CAF9",fontWeight:600,textAlign:"center"}}>Você pode adicionar mais filhos depois no painel 👨‍👩‍👧</div>
+      <div style={{display:"flex",flexDirection:"column",gap:6,width:"100%"}}>
+        <label style={{fontSize:11,fontWeight:800,color:"#90CAF9",textTransform:"uppercase",letterSpacing:1}}>🧒 Nome do filho(a)</label>
+        <input placeholder="Ex: Sofia"
+          style={{width:"100%",padding:"14px 16px",borderRadius:14,
+            border:"2px solid rgba(255,255,255,0.1)",
+            background:"rgba(255,255,255,0.06)",fontSize:16,fontWeight:700,outline:"none"}}/>
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:6,width:"100%"}}>
+        <label style={{fontSize:11,fontWeight:800,color:"#90CAF9",textTransform:"uppercase",letterSpacing:1}}>📚 Série do filho(a)</label>
+        <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
+          {GRADES.map((g,i)=>(
+            <button key={i} onClick={()=>setGrade(i)} style={{
+              padding:"10px 14px",borderRadius:14,cursor:"pointer",transition:"all 0.2s",
+              background:grade===i?`linear-gradient(135deg,${C.blue},${C.blueDk})`:"rgba(255,255,255,0.06)",
+              color:"white",border:grade===i?`2px solid #90CAF9`:"2px solid rgba(255,255,255,0.1)",
+              fontFamily:"'Fredoka One',sans-serif",fontSize:12,fontWeight:900}}>
+              {["📗","📘","📙","📕","📓"][i]} {g}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:6,width:"100%"}}>
+        <label style={{fontSize:11,fontWeight:800,color:"#90CAF9",textTransform:"uppercase",letterSpacing:1}}>🎭 Avatar do filho(a)</label>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          {AVATARS.slice(0,6).map((av,i)=>(
+            <button key={i} onClick={()=>setAvatar(i)} style={{
+              width:52,height:52,borderRadius:14,fontSize:26,cursor:"pointer",
+              background:avatar===i?`${C.gold}33`:"rgba(255,255,255,0.06)",
+              border:avatar===i?`3px solid ${C.gold}`:"2px solid rgba(255,255,255,0.1)",
+              transform:avatar===i?"scale(1.1)":"scale(1)",transition:"all 0.2s"}}>{av}</button>
+          ))}
+        </div>
+      </div>
+      <button onClick={()=>grade!==null&&setStep("ready")} style={{width:"100%",padding:15,borderRadius:20,border:"none",marginTop:"auto",
+        background:grade!==null?`linear-gradient(135deg,${C.gold},${C.goldDk})`:"rgba(255,255,255,0.1)",
+        color:grade!==null?C.dark:"#4A7AB5",fontSize:17,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",
+        cursor:grade!==null?"pointer":"not-allowed",boxShadow:grade!==null?`0 5px 0 #B86000`:"none",
+        transition:"all 0.2s"}}>🚀 Acessar painel!</button>
     </div>
   );
 
@@ -318,7 +371,7 @@ function LoginScreen({onDone, returning}){
         Bem-vindo(a), {name}!
       </div>
       <div style={{fontSize:14,color:"#BBDEFB",fontWeight:600,textAlign:"center",lineHeight:1.6}}>
-        Sua aventura começa agora.<br/>Boa sorte, {GRADES[grade]}! ⭐
+        {mode==="pai" ? `Painel ativo! Acompanhe ${GRADES[grade] || "seus filhos"} com facilidade. 👨‍👩‍👧` : `Sua aventura começa agora. Boa sorte, ${GRADES[grade]}! ⭐`}
       </div>
       <div style={{display:"flex",gap:10,width:"100%"}}>
         {[{i:"⚡",v:"0 XP"},{i:"🪙",v:"50 bônus"},{i:"🔥",v:"Dia 1"}].map((s,i)=>(
