@@ -362,6 +362,37 @@ function LoginScreen({onDone, returning}){
     </div>
   );
 
+  // READY SCREEN — diferente para pai vs aluno
+  if(mode==="pai") return(
+    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:16,padding:28,
+      background:"linear-gradient(160deg,#0D2D6E,#1565C0)"}}>
+      <div style={{fontSize:60,animation:"bounce 0.8s ease-in-out infinite"}}>🎉</div>
+      <div style={{fontSize:52}}>👨‍👩‍👧</div>
+      <div style={{fontSize:26,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",textAlign:"center"}}>
+        Tudo pronto, {name}!
+      </div>
+      <div style={{fontSize:14,color:"#BBDEFB",fontWeight:600,textAlign:"center",lineHeight:1.6}}>
+        Seu painel de acompanhamento está ativo. Monitore o progresso, tempo de estudo e desempenho do seu filho(a) em tempo real.
+      </div>
+      <div style={{display:"flex",gap:10,width:"100%"}}>
+        {[{i:"📊",v:"Relatórios",d:"detalhados"},{i:"⏱️",v:"Tempo",d:"de estudo"},{i:"🎯",v:"Acertos",d:"por matéria"}].map((s,i)=>(
+          <div key={i} style={{flex:1,background:"rgba(255,255,255,0.12)",borderRadius:16,padding:"12px 6px",
+            textAlign:"center",border:"2px solid rgba(255,255,255,0.2)"}}>
+            <div style={{fontSize:24}}>{s.i}</div>
+            <div style={{fontSize:12,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>{s.v}</div>
+            <div style={{fontSize:10,color:"#90CAF9",fontWeight:600}}>{s.d}</div>
+          </div>
+        ))}
+      </div>
+      <button onClick={()=>onDone("parent")} style={{width:"100%",padding:16,borderRadius:20,border:"none",
+        background:`linear-gradient(135deg,#FFD700,#FF8F00)`,color:"#0D1F3C",fontSize:18,fontWeight:900,
+        fontFamily:"'Fredoka One',sans-serif",cursor:"pointer",
+        boxShadow:"0 5px 0 #B86000, 0 8px 24px #FFD70044"}}>
+        👨‍👩‍👧 Ir para o painel!
+      </button>
+    </div>
+  );
+
   return(
     <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:16,padding:28,
       background:"linear-gradient(160deg,#0D47A1,#1E90FF)"}}>
@@ -371,7 +402,7 @@ function LoginScreen({onDone, returning}){
         Bem-vindo(a), {name}!
       </div>
       <div style={{fontSize:14,color:"#BBDEFB",fontWeight:600,textAlign:"center",lineHeight:1.6}}>
-        {mode==="pai" ? `Painel ativo! Acompanhe ${GRADES[grade] || "seus filhos"} com facilidade. 👨‍👩‍👧` : `Sua aventura começa agora. Boa sorte, ${GRADES[grade]}! ⭐`}
+        Sua aventura começa agora. Boa sorte, {GRADES[grade]}! ⭐
       </div>
       <div style={{display:"flex",gap:10,width:"100%"}}>
         {[{i:"⚡",v:"0 XP"},{i:"🪙",v:"50 bônus"},{i:"🔥",v:"Dia 1"}].map((s,i)=>(
