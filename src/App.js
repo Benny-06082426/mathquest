@@ -9,119 +9,194 @@ export function gerarCodigo(nome){const n=nome.toUpperCase().replace(/\s/g,"").s
 
 export const ShieldLogo=({s=40})=>(<svg width={s*.9} height={s} viewBox="0 0 80 88"><defs><linearGradient id="sl1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#FFE44D"/><stop offset="100%" stopColor="#FF9800"/></linearGradient><linearGradient id="sl2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#1E90FF"/><stop offset="100%" stopColor="#0047AB"/></linearGradient></defs><path d="M40 3 L76 17 L76 46 Q76 70 40 85 Q4 70 4 46 L4 17Z" fill="url(#sl1)" stroke="#FF8C00" strokeWidth="2"/><path d="M40 9 L70 22 L70 46 Q70 66 40 79 Q10 66 10 46 L10 22Z" fill="url(#sl2)" stroke="#42A5F5" strokeWidth="1"/><path d="M40 16 L56 25 L56 44 Q56 58 40 67 Q24 58 24 44 L24 25Z" fill="#0033AA"/><text x="40" y="51" textAnchor="middle" fill="white" fontSize="26" fontWeight="900" fontFamily="Arial Black">+</text><polygon points="40,3 43,11 52,11 45,16 48,24 40,19 32,24 35,16 28,11 37,11" fill="#FFE44D" stroke="#FF6600" strokeWidth="0.7"/><ellipse cx="18" cy="22" rx="5" ry="5" fill="#4CAF50" stroke="#2E7D32" strokeWidth="1"/><ellipse cx="62" cy="22" rx="5" ry="5" fill="#9C27B0" stroke="#6A1B9A" strokeWidth="1"/></svg>);
 
-export const MaxHero=({sz=80,mood="happy"})=>(<svg width={sz} height={sz*1.35} viewBox="0 0 140 189">
-  <defs>
-    <radialGradient id="mxbody" cx="50%" cy="40%" r="60%"><stop offset="0%" stopColor="#FF8A65"/><stop offset="100%" stopColor="#E64A19"/></radialGradient>
-    <radialGradient id="mxhead" cx="50%" cy="30%" r="60%"><stop offset="0%" stopColor="#FF7043"/><stop offset="100%" stopColor="#BF360C"/></radialGradient>
-  </defs>
-  {/* Sombra */}
-  <ellipse cx="70" cy="185" rx="32" ry="6" fill="rgba(0,0,0,0.2)"/>
-  {/* Capa traseira */}
-  <path d="M32 105 Q14 130 20 158 L70 144 L120 158 Q126 130 108 105" fill="#1565C0"/>
-  <path d="M32 105 Q20 128 22 148" stroke="#FFD700" strokeWidth="3" fill="none" strokeLinecap="round"/>
-  <path d="M108 105 Q120 128 118 148" stroke="#FFD700" strokeWidth="3" fill="none" strokeLinecap="round"/>
-  {/* Corpo */}
-  <ellipse cx="70" cy="118" rx="30" ry="28" fill="url(#mxbody)"/>
-  {/* Barriga clara */}
-  <ellipse cx="70" cy="124" rx="18" ry="18" fill="#FFCCBC"/>
-  {/* Cinto */}
-  <rect x="40" y="108" width="60" height="9" rx="4.5" fill="#4E342E"/>
-  <rect x="64" y="107" width="12" height="11" rx="3" fill="#FFD700" stroke="#FF8C00" strokeWidth="1.5"/>
-  {/* Cabeça */}
-  <ellipse cx="70" cy="66" rx="36" ry="34" fill="url(#mxhead)"/>
-  {/* Orelhas/pontas */}
-  <polygon points="32,50 20,18 48,38" fill="#FF7043"/>
-  <polygon points="108,50 120,18 92,38" fill="#FF7043"/>
-  <polygon points="34,48 24,22 46,38" fill="#FFCA28"/>
-  <polygon points="106,48 116,22 94,38" fill="#FFCA28"/>
-  {/* Rosto claro */}
-  <ellipse cx="70" cy="74" rx="24" ry="20" fill="#FFCCBC"/>
-  {/* Olhos */}
-  <ellipse cx="57" cy="62" rx="9" ry="10" fill="white"/>
-  <ellipse cx="83" cy="62" rx="9" ry="10" fill="white"/>
-  <ellipse cx="57" cy="63" rx="6" ry="7" fill="#1A237E"/>
-  <ellipse cx="83" cy="63" rx="6" ry="7" fill="#1A237E"/>
-  <ellipse cx="57" cy="63" rx="3.5" ry="4" fill="#0D0D0D"/>
-  <ellipse cx="83" cy="63" rx="3.5" ry="4" fill="#0D0D0D"/>
-  <circle cx="59" cy="61" r="2" fill="white"/>
-  <circle cx="85" cy="61" r="2" fill="white"/>
-  {/* Sobrancelhas */}
-  <path d="M48 54 Q57 50 66 54" stroke="#4E2C00" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-  <path d="M74 54 Q83 50 92 54" stroke="#4E2C00" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-  {/* Nariz */}
-  <ellipse cx="70" cy="72" rx="4" ry="3" fill="#BF360C"/>
-  {/* Boca */}
-  {mood==="happy"&&<path d="M58 80 Q70 92 82 80" stroke="#BF360C" strokeWidth="3" fill="none" strokeLinecap="round"/>}
-  {mood==="sad"&&<path d="M58 86 Q70 76 82 86" stroke="#BF360C" strokeWidth="3" fill="none" strokeLinecap="round"/>}
-  {mood==="wow"&&<ellipse cx="70" cy="84" rx="8" ry="7" fill="#BF360C"/>}
-  {/* Bochechas */}
-  <ellipse cx="44" cy="76" rx="9" ry="6" fill="#FF8A65" opacity="0.6"/>
-  <ellipse cx="96" cy="76" rx="9" ry="6" fill="#FF8A65" opacity="0.6"/>
-  {/* Espada */}
-  <rect x="108" y="36" width="7" height="44" rx="3.5" fill="#ECEFF1" stroke="#B0BEC5" strokeWidth="1"/>
-  <rect x="100" y="36" width="22" height="8" rx="4" fill="#FFD700" stroke="#FF8C00" strokeWidth="1.5"/>
-  <rect x="110" y="24" width="6" height="14" rx="3" fill="#CFD8DC"/>
-  <circle cx="113" cy="79" r="5" fill="#FFD700" stroke="#FF8C00" strokeWidth="1.5"/>
-</svg>);
+export const MaxHero=({sz=80,mood="happy"})=>{
+  const expressions={happy:"😄",sad:"😢",wow:"😮"};
+  return(
+  <div style={{position:"relative",width:sz,height:sz*1.35,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+    {/* Corpo - Herói aventureiro */}
+    <svg width={sz} height={sz*1.35} viewBox="0 0 120 162">
+      <defs>
+        <radialGradient id="maxSkin" cx="50%" cy="35%" r="55%"><stop offset="0%" stopColor="#FDBCB4"/><stop offset="100%" stopColor="#E8896A"/></radialGradient>
+        <radialGradient id="maxHair" cx="50%" cy="30%" r="60%"><stop offset="0%" stopColor="#795548"/><stop offset="100%" stopColor="#3E2723"/></radialGradient>
+        <radialGradient id="maxArmor" cx="50%" cy="30%" r="60%"><stop offset="0%" stopColor="#42A5F5"/><stop offset="100%" stopColor="#1565C0"/></radialGradient>
+        <filter id="maxShadow"><feDropShadow dx="0" dy="3" stdDeviation="2" floodColor="#00000033"/></filter>
+      </defs>
+      {/* Sombra chão */}
+      <ellipse cx="60" cy="158" rx="24" ry="5" fill="rgba(0,0,0,0.15)"/>
+      {/* Capa */}
+      <path d="M28 95 Q12 122 18 148 L60 136 L102 148 Q108 122 92 95 Q76 100 60 100 Q44 100 28 95Z" fill="#1565C0" stroke="#0D47A1" strokeWidth="1.5"/>
+      <path d="M28 95 Q18 118 20 140" stroke="#FFD700" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+      <path d="M92 95 Q102 118 100 140" stroke="#FFD700" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+      {/* Pernas */}
+      <rect x="42" y="118" width="14" height="28" rx="6" fill="#5D4037"/>
+      <rect x="64" y="118" width="14" height="28" rx="6" fill="#5D4037"/>
+      {/* Botas */}
+      <rect x="40" y="138" width="18" height="10" rx="5" fill="#3E2723"/>
+      <rect x="62" y="138" width="18" height="10" rx="5" fill="#3E2723"/>
+      {/* Corpo / Armadura */}
+      <rect x="34" y="86" width="52" height="36" rx="12" fill="url(#maxArmor)" filter="url(#maxShadow)"/>
+      {/* Detalhes armadura */}
+      <rect x="34" y="86" width="52" height="10" rx="6" fill="#1976D2"/>
+      <ellipse cx="60" cy="97" rx="8" ry="6" fill="#FFD700" stroke="#FF8C00" strokeWidth="1"/>
+      <ellipse cx="60" cy="97" rx="4" ry="3" fill="#FFF9C4"/>
+      {/* Cinto */}
+      <rect x="34" y="114" width="52" height="8" rx="4" fill="#4E342E"/>
+      <rect x="54" y="113" width="12" height="10" rx="3" fill="#FFD700" stroke="#FF8C00" strokeWidth="1.5"/>
+      {/* Braços */}
+      <rect x="16" y="86" width="18" height="32" rx="8" fill="url(#maxArmor)"/>
+      <rect x="86" y="86" width="18" height="32" rx="8" fill="url(#maxArmor)"/>
+      {/* Mãos */}
+      <ellipse cx="25" cy="122" rx="8" ry="7" fill="url(#maxSkin)"/>
+      <ellipse cx="95" cy="118" rx="8" ry="7" fill="url(#maxSkin)"/>
+      {/* Pescoço */}
+      <rect x="52" y="70" width="16" height="18" rx="6" fill="url(#maxSkin)"/>
+      {/* Cabeça */}
+      <ellipse cx="60" cy="54" rx="30" ry="28" fill="url(#maxSkin)" filter="url(#maxShadow)"/>
+      {/* Cabelo topo */}
+      <ellipse cx="60" cy="32" rx="30" ry="18" fill="url(#maxHair)"/>
+      {/* Mechas de cabelo espetado */}
+      <path d="M38 32 Q34 14 42 10 Q44 22 38 32Z" fill="#5D4037"/>
+      <path d="M50 26 Q50 8 58 6 Q58 18 52 28Z" fill="#5D4037"/>
+      <path d="M62 26 Q64 8 72 10 Q70 22 64 28Z" fill="#5D4037"/>
+      <path d="M72 30 Q78 14 84 16 Q80 26 74 32Z" fill="#5D4037"/>
+      {/* Orelhas */}
+      <ellipse cx="30" cy="56" rx="6" ry="8" fill="url(#maxSkin)"/>
+      <ellipse cx="90" cy="56" rx="6" ry="8" fill="url(#maxSkin)"/>
+      {/* Olhos brancos grandes */}
+      <ellipse cx="48" cy="52" rx="10" ry="11" fill="white" stroke="#E0E0E0" strokeWidth="0.5"/>
+      <ellipse cx="72" cy="52" rx="10" ry="11" fill="white" stroke="#E0E0E0" strokeWidth="0.5"/>
+      {/* Íris */}
+      <ellipse cx="48" cy="53" rx="7" ry="7.5" fill="#1565C0"/>
+      <ellipse cx="72" cy="53" rx="7" ry="7.5" fill="#1565C0"/>
+      {/* Pupila */}
+      <ellipse cx="48" cy="54" rx="4" ry="4.5" fill="#0D0D0D"/>
+      <ellipse cx="72" cy="54" rx="4" ry="4.5" fill="#0D0D0D"/>
+      {/* Reflexo olho */}
+      <circle cx="50" cy="51" r="2.5" fill="white"/>
+      <circle cx="74" cy="51" r="2.5" fill="white"/>
+      <circle cx="52" cy="55" r="1.2" fill="white" opacity="0.6"/>
+      <circle cx="76" cy="55" r="1.2" fill="white" opacity="0.6"/>
+      {/* Sobrancelhas */}
+      <path d="M38 42 Q48 37 58 42" stroke="#3E2723" strokeWidth="3" fill="none" strokeLinecap="round"/>
+      <path d="M62 42 Q72 37 82 42" stroke="#3E2723" strokeWidth="3" fill="none" strokeLinecap="round"/>
+      {/* Nariz */}
+      <ellipse cx="60" cy="61" rx="4" ry="3" fill="#E8896A"/>
+      <circle cx="57" cy="62" r="1.5" fill="#C97B5A" opacity="0.7"/>
+      <circle cx="63" cy="62" r="1.5" fill="#C97B5A" opacity="0.7"/>
+      {/* Boca */}
+      {mood==="happy"&&<><path d="M46 70 Q60 82 74 70" stroke="#C62828" strokeWidth="2.5" fill="none" strokeLinecap="round"/><path d="M46 70 Q60 84 74 70" fill="#E53935" opacity="0.3"/></>}
+      {mood==="sad"&&<path d="M48 76 Q60 66 72 76" stroke="#C62828" strokeWidth="2.5" fill="none" strokeLinecap="round"/>}
+      {mood==="wow"&&<ellipse cx="60" cy="74" rx="9" ry="8" fill="#C62828"/>}
+      {/* Bochechas */}
+      <ellipse cx="36" cy="66" rx="10" ry="7" fill="#FFB3A0" opacity="0.55"/>
+      <ellipse cx="84" cy="66" rx="10" ry="7" fill="#FFB3A0" opacity="0.55"/>
+      {/* Dentes (sorriso) */}
+      {mood==="happy"&&<ellipse cx="60" cy="76" rx="8" ry="4" fill="white" opacity="0.9"/>}
+      {/* Espada */}
+      <rect x="96" y="28" width="7" height="48" rx="3.5" fill="#ECEFF1" stroke="#90A4AE" strokeWidth="1"/>
+      <rect x="88" y="28" width="22" height="9" rx="4.5" fill="#FFD700" stroke="#FF8C00" strokeWidth="1.5"/>
+      <rect x="98" y="16" width="6" height="14" rx="3" fill="#CFD8DC" stroke="#B0BEC5" strokeWidth="1"/>
+      <circle cx="101" cy="75" r="6" fill="#FFD700" stroke="#FF8C00" strokeWidth="1.5"/>
+      <circle cx="101" cy="75" r="3" fill="#FFF9C4"/>
+    </svg>
+  </div>
+);};
 
-export const LiaHero=({sz=80})=>(<svg width={sz} height={sz*1.35} viewBox="0 0 140 189">
-  <defs>
-    <radialGradient id="liabody" cx="50%" cy="40%" r="60%"><stop offset="0%" stopColor="#F48FB1"/><stop offset="100%" stopColor="#C2185B"/></radialGradient>
-  </defs>
-  {/* Sombra */}
-  <ellipse cx="70" cy="185" rx="32" ry="6" fill="rgba(0,0,0,0.2)"/>
-  {/* Manto */}
-  <path d="M32 105 Q14 130 20 158 L70 144 L120 158 Q126 130 108 105" fill="#6A1B9A"/>
-  <path d="M32 105 Q20 128 22 148" stroke="#CE93D8" strokeWidth="3" fill="none" strokeLinecap="round"/>
-  <path d="M108 105 Q120 128 118 148" stroke="#CE93D8" strokeWidth="3" fill="none" strokeLinecap="round"/>
-  {/* Estrelas no manto */}
-  <text x="50" y="135" fontSize="10" fill="#FFD700" opacity="0.8">✦</text>
-  <text x="80" y="148" fontSize="8" fill="#FFD700" opacity="0.7">✦</text>
-  {/* Corpo */}
-  <ellipse cx="70" cy="118" rx="30" ry="28" fill="url(#liabody)"/>
-  <ellipse cx="70" cy="124" rx="18" ry="18" fill="#FCE4EC"/>
-  {/* Cinto */}
-  <rect x="42" y="108" width="56" height="8" rx="4" fill="#4A148C"/>
-  <ellipse cx="70" cy="112" rx="8" ry="6" fill="#9C27B0" stroke="#7B1FA2" strokeWidth="1"/>
-  <ellipse cx="70" cy="112" rx="4" ry="3" fill="#E1BEE7"/>
-  {/* Cabeça */}
-  <ellipse cx="70" cy="66" rx="36" ry="34" fill="#F06292"/>
-  {/* Cabelo */}
-  <ellipse cx="70" cy="42" rx="38" ry="22" fill="#4E342E"/>
-  <path d="M30 52 Q22 72 30 90" stroke="#4E342E" strokeWidth="14" strokeLinecap="round" fill="none"/>
-  <path d="M110 52 Q118 72 110 90" stroke="#4E342E" strokeWidth="14" strokeLinecap="round" fill="none"/>
-  {/* Laço de cabelo */}
-  <path d="M42 42 Q56 32 70 40 Q56 50 42 42Z" fill="#E91E63"/>
-  <path d="M98 42 Q84 32 70 40 Q84 50 98 42Z" fill="#E91E63"/>
-  <circle cx="70" cy="40" r="6" fill="#FF4081"/>
-  {/* Rosto claro */}
-  <ellipse cx="70" cy="74" rx="24" ry="20" fill="#FCE4EC"/>
-  {/* Olhos */}
-  <ellipse cx="57" cy="62" rx="9" ry="10" fill="white"/>
-  <ellipse cx="83" cy="62" rx="9" ry="10" fill="white"/>
-  <ellipse cx="57" cy="63" rx="6" ry="7" fill="#880E4F"/>
-  <ellipse cx="83" cy="63" rx="6" ry="7" fill="#880E4F"/>
-  <ellipse cx="57" cy="63" rx="3.5" ry="4" fill="#0D0D0D"/>
-  <ellipse cx="83" cy="63" rx="3.5" ry="4" fill="#0D0D0D"/>
-  <circle cx="59" cy="61" r="2" fill="white"/>
-  <circle cx="85" cy="61" r="2" fill="white"/>
-  {/* Cílios */}
-  <path d="M48 54 Q57 51 64 55" stroke="#880E4F" strokeWidth="2" fill="none" strokeLinecap="round"/>
-  <path d="M76 55 Q83 51 92 54" stroke="#880E4F" strokeWidth="2" fill="none" strokeLinecap="round"/>
-  {/* Nariz */}
-  <ellipse cx="70" cy="72" rx="3.5" ry="2.5" fill="#C2185B"/>
-  {/* Sorriso */}
-  <path d="M59 80 Q70 91 81 80" stroke="#C2185B" strokeWidth="3" fill="none" strokeLinecap="round"/>
-  {/* Bochechas */}
-  <ellipse cx="45" cy="76" rx="9" ry="6" fill="#F48FB1" opacity="0.7"/>
-  <ellipse cx="95" cy="76" rx="9" ry="6" fill="#F48FB1" opacity="0.7"/>
-  {/* Varinha */}
-  <rect x="14" y="34" width="6" height="48" rx="3" fill="#6D4C41" stroke="#4E342E" strokeWidth="1"/>
-  <polygon points="17,34 9,16 25,16" fill="#FFD700" stroke="#FF8C00" strokeWidth="1"/>
-  <circle cx="17" cy="16" r="10" fill="#9C27B0" stroke="#7B1FA2" strokeWidth="2"/>
-  <circle cx="17" cy="16" r="5" fill="#E1BEE7"/>
-  <text x="13" y="20" fontSize="6" fill="#FFD700">✦</text>
-</svg>);
+export const LiaHero=({sz=80})=>(
+  <div style={{position:"relative",width:sz,height:sz*1.35,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+    <svg width={sz} height={sz*1.35} viewBox="0 0 120 162">
+      <defs>
+        <radialGradient id="liaSkin" cx="50%" cy="35%" r="55%"><stop offset="0%" stopColor="#FDBCB4"/><stop offset="100%" stopColor="#E8896A"/></radialGradient>
+        <radialGradient id="liaHair" cx="50%" cy="30%" r="60%"><stop offset="0%" stopColor="#6D4C41"/><stop offset="100%" stopColor="#3E2723"/></radialGradient>
+        <radialGradient id="liaRobe" cx="50%" cy="30%" r="60%"><stop offset="0%" stopColor="#9C27B0"/><stop offset="100%" stopColor="#4A148C"/></radialGradient>
+        <filter id="liaShadow"><feDropShadow dx="0" dy="3" stdDeviation="2" floodColor="#00000033"/></filter>
+      </defs>
+      {/* Sombra */}
+      <ellipse cx="60" cy="158" rx="24" ry="5" fill="rgba(0,0,0,0.15)"/>
+      {/* Manto traseiro */}
+      <path d="M26 88 Q16 118 22 148 L60 138 L98 148 Q104 118 94 88 Q78 94 60 94 Q42 94 26 88Z" fill="#4A148C"/>
+      {/* Saia do manto */}
+      <path d="M22 118 Q18 138 22 148 L60 140 L98 148 Q102 138 98 118" fill="#6A1B9A"/>
+      {/* Estrelinhas no manto */}
+      <circle cx="38" cy="128" r="2" fill="#FFD700" opacity="0.8"/>
+      <circle cx="55" cy="138" r="1.5" fill="#FFD700" opacity="0.7"/>
+      <circle cx="76" cy="130" r="2" fill="#FFD700" opacity="0.8"/>
+      <circle cx="88" cy="142" r="1.5" fill="#FFD700" opacity="0.6"/>
+      {/* Corpo / Veste */}
+      <rect x="34" y="84" width="52" height="36" rx="12" fill="url(#liaRobe)" filter="url(#liaShadow)"/>
+      {/* Detalhes veste */}
+      <rect x="34" y="84" width="52" height="11" rx="6" fill="#7B1FA2"/>
+      {/* Gola/broche */}
+      <ellipse cx="60" cy="92" rx="9" ry="7" fill="#FFD700" stroke="#FF8C00" strokeWidth="1"/>
+      <ellipse cx="60" cy="92" rx="5" ry="4" fill="#9C27B0"/>
+      <ellipse cx="60" cy="92" rx="2.5" ry="2" fill="#E1BEE7"/>
+      {/* Cinto */}
+      <rect x="34" y="112" width="52" height="8" rx="4" fill="#4A148C"/>
+      <ellipse cx="60" cy="116" rx="8" ry="5" fill="#9C27B0" stroke="#7B1FA2" strokeWidth="1"/>
+      {/* Braços */}
+      <rect x="14" y="84" width="20" height="34" rx="9" fill="url(#liaRobe)"/>
+      <rect x="86" y="84" width="20" height="34" rx="9" fill="url(#liaRobe)"/>
+      {/* Mãos */}
+      <ellipse cx="24" cy="122" rx="8" ry="7" fill="url(#liaSkin)"/>
+      <ellipse cx="96" cy="118" rx="8" ry="7" fill="url(#liaSkin)"/>
+      {/* Pescoço */}
+      <rect x="52" y="68" width="16" height="18" rx="6" fill="url(#liaSkin)"/>
+      {/* Cabeça */}
+      <ellipse cx="60" cy="52" rx="30" ry="28" fill="url(#liaSkin)" filter="url(#liaShadow)"/>
+      {/* Cabelo base */}
+      <ellipse cx="60" cy="30" rx="32" ry="20" fill="url(#liaHair)"/>
+      {/* Cabelo lateral esquerdo */}
+      <path d="M28 44 Q18 60 22 80 Q28 78 32 72 Q28 62 32 50Z" fill="#5D4037"/>
+      {/* Cabelo lateral direito */}
+      <path d="M92 44 Q102 60 98 80 Q92 78 88 72 Q92 62 88 50Z" fill="#5D4037"/>
+      {/* Chapéu de mago */}
+      <path d="M30 36 Q60 0 90 36 Q74 38 60 36 Q46 38 30 36Z" fill="#4A148C" stroke="#7B1FA2" strokeWidth="1"/>
+      <ellipse cx="60" cy="36" rx="32" ry="9" fill="#6A1B9A" stroke="#9C27B0" strokeWidth="1"/>
+      {/* Faixa do chapéu */}
+      <path d="M34 34 Q60 26 86 34" stroke="#FFD700" strokeWidth="3" fill="none" strokeLinecap="round"/>
+      {/* Estrela no chapéu */}
+      <polygon points="60,6 62,12 68,12 63,16 65,22 60,18 55,22 57,16 52,12 58,12" fill="#FFD700"/>
+      {/* Orelhas */}
+      <ellipse cx="30" cy="54" rx="6" ry="8" fill="url(#liaSkin)"/>
+      <ellipse cx="90" cy="54" rx="6" ry="8" fill="url(#liaSkin)"/>
+      {/* Olhos */}
+      <ellipse cx="48" cy="50" rx="10" ry="11" fill="white" stroke="#E0E0E0" strokeWidth="0.5"/>
+      <ellipse cx="72" cy="50" rx="10" ry="11" fill="white" stroke="#E0E0E0" strokeWidth="0.5"/>
+      <ellipse cx="48" cy="51" rx="7" ry="7.5" fill="#6A1B9A"/>
+      <ellipse cx="72" cy="51" rx="7" ry="7.5" fill="#6A1B9A"/>
+      <ellipse cx="48" cy="52" rx="4" ry="4.5" fill="#0D0D0D"/>
+      <ellipse cx="72" cy="52" rx="4" ry="4.5" fill="#0D0D0D"/>
+      <circle cx="50" cy="49" r="2.5" fill="white"/>
+      <circle cx="74" cy="49" r="2.5" fill="white"/>
+      <circle cx="52" cy="53" r="1.2" fill="white" opacity="0.6"/>
+      <circle cx="76" cy="53" r="1.2" fill="white" opacity="0.6"/>
+      {/* Cílios */}
+      <path d="M38 41 Q44 37 52 40" stroke="#3E2723" strokeWidth="2" fill="none" strokeLinecap="round"/>
+      <path d="M68 40 Q76 37 82 41" stroke="#3E2723" strokeWidth="2" fill="none" strokeLinecap="round"/>
+      {/* Sobrancelhas */}
+      <path d="M38 42 Q48 38 58 42" stroke="#3E2723" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+      <path d="M62 42 Q72 38 82 42" stroke="#3E2723" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+      {/* Nariz */}
+      <ellipse cx="60" cy="59" rx="4" ry="3" fill="#E8896A"/>
+      {/* Sorriso */}
+      <path d="M48 68 Q60 80 72 68" stroke="#C62828" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+      <ellipse cx="60" cy="73" rx="7" ry="4" fill="white" opacity="0.8"/>
+      {/* Bochechas */}
+      <ellipse cx="36" cy="64" rx="10" ry="7" fill="#FFB3A0" opacity="0.55"/>
+      <ellipse cx="84" cy="64" rx="10" ry="7" fill="#FFB3A0" opacity="0.55"/>
+      {/* Varinha */}
+      <rect x="8" y="36" width="7" height="52" rx="3.5" fill="#6D4C41" stroke="#4E342E" strokeWidth="1"/>
+      <polygon points="11.5,36 4,18 19,18" fill="#FFD700" stroke="#FF8C00" strokeWidth="1"/>
+      <circle cx="11.5" cy="14" r="11" fill="#9C27B0" stroke="#7B1FA2" strokeWidth="2"/>
+      <circle cx="11.5" cy="14" r="6" fill="#E1BEE7"/>
+      <circle cx="11.5" cy="14" r="3" fill="#CE93D8"/>
+      {/* Brilhos na varinha */}
+      <circle cx="6" cy="8" r="2" fill="#FFD700" opacity="0.8"/>
+      <circle cx="17" cy="8" r="2" fill="#FFD700" opacity="0.8"/>
+      <circle cx="11.5" cy="4" r="2" fill="#FFD700" opacity="0.8"/>
+    </svg>
+  </div>
+);
 
 export const Star=({on,sz=18})=>(<svg width={sz} height={sz} viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9.5 17,14 18.5,21 12,17.5 5.5,21 7,14 2,9.5 9,9" fill={on?"#FFD700":"#1E3A6E"} stroke={on?"#FF8C00":"#2A4A8E"} strokeWidth="1.2"/></svg>);
 export const Coin=({sz=18})=>(<svg width={sz} height={sz} viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#FFD700" stroke="#FF8C00" strokeWidth="1.5"/><circle cx="12" cy="12" r="8.5" fill="#FFC107"/><circle cx="12" cy="12" r="6" fill="#FFD700"/><text x="12" y="16" textAnchor="middle" fill="#7B3F00" fontSize="8" fontWeight="900" fontFamily="Arial Black">$</text></svg>);
