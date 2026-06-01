@@ -10,13 +10,13 @@ export function gerarCodigo(nome){const n=nome.toUpperCase().replace(/\s/g,"").s
 export const ShieldLogo=({s=40})=>(<svg width={s*.9} height={s} viewBox="0 0 80 88"><defs><linearGradient id="sl1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#FFE44D"/><stop offset="100%" stopColor="#FF9800"/></linearGradient><linearGradient id="sl2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#1E90FF"/><stop offset="100%" stopColor="#0047AB"/></linearGradient></defs><path d="M40 3 L76 17 L76 46 Q76 70 40 85 Q4 70 4 46 L4 17Z" fill="url(#sl1)" stroke="#FF8C00" strokeWidth="2"/><path d="M40 9 L70 22 L70 46 Q70 66 40 79 Q10 66 10 46 L10 22Z" fill="url(#sl2)" stroke="#42A5F5" strokeWidth="1"/><path d="M40 16 L56 25 L56 44 Q56 58 40 67 Q24 58 24 44 L24 25Z" fill="#0033AA"/><text x="40" y="51" textAnchor="middle" fill="white" fontSize="26" fontWeight="900" fontFamily="Arial Black">+</text><polygon points="40,3 43,11 52,11 45,16 48,24 40,19 32,24 35,16 28,11 37,11" fill="#FFE44D" stroke="#FF6600" strokeWidth="0.7"/><ellipse cx="18" cy="22" rx="5" ry="5" fill="#4CAF50" stroke="#2E7D32" strokeWidth="1"/><ellipse cx="62" cy="22" rx="5" ry="5" fill="#9C27B0" stroke="#6A1B9A" strokeWidth="1"/></svg>);
 
 const MaxHero=({sz=80,mood="happy"})=>(
-  <img src="https://raw.githubusercontent.com/Benny-06082426/mathquest/main/public/max.png" alt="Max"
+  <img src="https://raw.githubusercontent.com/Benny-06082426/mathquest/main/public/Menino.png" alt="Max"
     style={{width:sz,height:sz*1.4,objectFit:"contain",filter:"drop-shadow(0 8px 20px rgba(0,0,0,0.4))"}}
   />
 );
 
 const LiaHero=({sz=80})=>(
-  <img src="https://raw.githubusercontent.com/Benny-06082426/mathquest/main/public/lia.png" alt="Lia"
+  <img src="https://raw.githubusercontent.com/Benny-06082426/mathquest/main/public/Menina.png" alt="Lia"
     style={{width:sz,height:sz*1.4,objectFit:"contain",filter:"drop-shadow(0 8px 20px rgba(0,0,0,0.4))"}}
   />
 );
