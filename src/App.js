@@ -190,14 +190,14 @@ function LoginScreen({ onDone }) {
         <div style={{ fontSize:11, color:"#90CAF9", fontWeight:700, letterSpacing:1, textAlign:"center" }}>APRENDER MATEMÁTICA NUNCA FOI TÃO DIVERTIDO!</div>
       </div>
 
-      {/* Mascotes */}
-      <div style={{ display:"flex", justifyContent:"space-around", alignItems:"flex-end", width:"100%", zIndex:1, flex:1, minHeight:0 }}>
-        <div style={{ animation:"heroFloat 2.5s ease-in-out infinite", animationDelay:"0.3s", flexShrink:0 }}><MaxHero sz={155}/></div>
-        <div style={{ animation:"heroFloat 2.5s ease-in-out infinite", animationDelay:"0.8s", flexShrink:0 }}><LiaHero sz={145}/></div>
+      {/* Mascotes + botão juntos na parte de baixo */}
+      <div style={{ display:"flex", justifyContent:"space-around", alignItems:"flex-end", width:"100%", zIndex:1, marginTop:"auto", marginBottom:4 }}>
+        <div style={{ animation:"heroFloat 2.5s ease-in-out infinite", animationDelay:"0.3s" }}><MaxHero sz={130}/></div>
+        <div style={{ animation:"heroFloat 2.5s ease-in-out infinite", animationDelay:"0.8s" }}><LiaHero sz={120}/></div>
       </div>
 
       {/* Botão */}
-      <button onClick={() => setStep("welcome")} style={{ width:"100%", padding:"16px 0", borderRadius:40, border:"none", zIndex:1, background:"linear-gradient(135deg,#2ECC71,#1B8A3A)", color:"white", fontSize:22, fontWeight:900, fontFamily:"'Fredoka One',sans-serif", cursor:"pointer", letterSpacing:2, boxShadow:"0 6px 0 #145A20, 0 10px 28px #00000055", marginTop:12, flexShrink:0 }}>COMEÇAR</button>
+      <button onClick={() => setStep("welcome")} style={{ width:"100%", padding:"15px 0", borderRadius:40, border:"none", zIndex:1, background:"linear-gradient(135deg,#2ECC71,#1B8A3A)", color:"white", fontSize:22, fontWeight:900, fontFamily:"'Fredoka One',sans-serif", cursor:"pointer", letterSpacing:2, boxShadow:"0 6px 0 #145A20", flexShrink:0 }}>COMEÇAR</button>
     </div>
   );
 
@@ -487,10 +487,9 @@ function MapScreen({ go, toast }) {
   const biome = BIOME_EMOJIS[regiaoAtiva];
 
   return (
-    <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden" }}>
-
-      {/* MAPA */}
-      <div style={{ flex:1, position:"relative", overflow:"hidden" }}>
+    <div style={{ flex:1, position:"relative", overflow:"hidden" }}>
+      {/* MAPA — tela cheia */}
+      <div style={{ position:"absolute", inset:0 }}>
         {/* Background */}
         <div style={{ position:"absolute", inset:0, background:BG_COLORS[regiaoAtiva], transition:"background 0.5s" }}/>
 
@@ -622,26 +621,26 @@ function MapScreen({ go, toast }) {
         </div>
       </div>
 
-      {/* SELETOR DE REGIÕES */}
-      <div style={{ background:"linear-gradient(180deg,#0A0F1E,#0D1B3E)", borderTop:`3px solid ${C.gold}`, padding:"8px 8px 4px", overflowX:"auto" }}>
-        <div style={{ display:"flex", gap:6, minWidth:"max-content", paddingBottom:4 }}>
+      {/* SELETOR DE REGIÕES — overlay flutuante no topo */}
+      <div style={{ position:"absolute", top:4, left:0, right:0, zIndex:20, display:"flex", justifyContent:"center", pointerEvents:"none" }}>
+        <div style={{ display:"flex", gap:4, background:"rgba(0,0,0,0.6)", borderRadius:20, padding:"4px 8px", backdropFilter:"blur(8px)", pointerEvents:"all" }}>
           {REGIOES.map((r,i)=>{
             const ativo = regiaoAtiva === i;
-            const bloqueado = i > 0; // só 1º ano desbloqueado
+            const bloqueado = i > 0;
             return (
               <button key={i} onClick={()=>{
-                if(bloqueado && i > 0){toast("🔒",`Complete o ${REGIOES[i-1].nome.split(".")[1].trim()} primeiro!`,"info");return;}
+                if(bloqueado){toast("🔒","Complete o reino anterior primeiro!","info");return;}
                 setRegiaoAtiva(i);
               }} style={{
-                display:"flex", flexDirection:"column", alignItems:"center", gap:2,
-                padding:"6px 10px", borderRadius:14, border:`2px solid ${ativo ? r.corClaro : "rgba(255,255,255,0.15)"}`,
-                background: ativo ? r.bg : "rgba(255,255,255,0.05)",
-                cursor:"pointer", minWidth:70, transition:"all 0.2s",
+                display:"flex", flexDirection:"column", alignItems:"center", gap:1,
+                padding:"4px 8px", borderRadius:12,
+                border:`2px solid ${ativo ? r.corClaro : "transparent"}`,
+                background: ativo ? r.bg : "transparent",
+                cursor:"pointer", transition:"all 0.2s",
                 opacity: bloqueado && !ativo ? 0.5 : 1,
-                boxShadow: ativo ? `0 4px 0 ${r.cor}, 0 0 16px ${r.corClaro}44` : "none",
               }}>
-                <span style={{ fontSize:18 }}>{bloqueado && i > 0 ? "🔒" : r.emoji}</span>
-                <span style={{ fontSize:9, fontWeight:900, color: ativo ? "white" : "#90CAF9", fontFamily:"'Fredoka One',sans-serif", textAlign:"center", lineHeight:1.2 }}>
+                <span style={{ fontSize:16 }}>{bloqueado ? "🔒" : r.emoji}</span>
+                <span style={{ fontSize:8, fontWeight:900, color: ativo ? "white" : "#90CAF9", fontFamily:"'Fredoka One',sans-serif" }}>
                   {r.serie}
                 </span>
               </button>
@@ -669,7 +668,13 @@ function genQNivel(mode, nivel=1){
     const a=Math.floor(Math.random()*max)+1;
     const opts=[a];
     while(opts.length<4){const r=a+Math.floor(Math.random()*6)-3;if(r>0&&!opts.includes(r))opts.push(r);}
-    return{q:`Conta os objetos: ${"⭐".repeat(Math.min(a,10))}${a>10?"... ("+a+")":""}`,ans:a,opts:opts.slice(0,4).sort(()=>Math.random()-0.5)};
+    const emojis=["🍎","🌟","🐶","🦋","🎈","🍭","🌈","🐸"];
+    const em=emojis[Math.floor(Math.random()*emojis.length)];
+    const exibir=Math.min(a,8);
+    const linha1=em.repeat(Math.min(exibir,4));
+    const linha2=exibir>4?em.repeat(exibir-4):"";
+    const mais=a>8?` +${a-8} mais`:"";
+    const qText=linha1+(linha2?"\n"+linha2:"")+(mais?"  "+mais:"")+"\n= ?";return{q:qText,ans:a,opts:opts.slice(0,4).sort(()=>Math.random()-0.5)};
   }
   if(mode==="numeros"){
     const a=Math.floor(Math.random()*max)+1;
@@ -780,9 +785,17 @@ function QuizScreen({ go, toast, showBurst }) {
       <div style={{animation:"heroFloat 1.5s ease-in-out infinite"}}><MaxHero sz={110} mood={acertos>=ACERTOS_NECESSARIOS?"wow":"sad"}/></div>
       <div style={{display:"flex",gap:6}}>{[1,2,3].map(s=>(<div key={s} style={{animation:s<=(acertos>=5?3:acertos>=3?2:acertos>=1?1:0)?`popIn 0.4s ${s*0.15}s both`:"none"}}><Star on={s<=(acertos>=5?3:acertos>=3?2:acertos>=1?1:0)} sz={52}/></div>))}</div>
       <div style={{background:`${C.gold}18`,border:`3px solid ${C.gold}55`,borderRadius:20,padding:"12px 32px",fontSize:22,fontWeight:900,color:C.gold,fontFamily:"'Fredoka One',sans-serif"}}>⭐ {acertos} de {ACERTOS_NECESSARIOS} acertos</div>
+      {acertos>=ACERTOS_NECESSARIOS ? (
+        <button onClick={()=>start(mode, nivel)} style={{width:"100%",padding:16,borderRadius:22,border:"none",
+          background:`linear-gradient(135deg,${C.green},#1B8A3A)`,color:"white",fontSize:18,fontWeight:900,
+          fontFamily:"'Fredoka One',sans-serif",cursor:"pointer",boxShadow:`0 6px 0 #145A20`,
+          animation:"bounce 0.6s ease-in-out"}}>
+          🚀 PRÓXIMA FASE →
+        </button>
+      ) : null}
       <div style={{display:"flex",gap:10,width:"100%"}}>
-        <button onClick={()=>start(mode)} style={{flex:1,padding:14,borderRadius:20,border:"none",background:`linear-gradient(135deg,${C.blue},${C.blueDk})`,color:"white",fontSize:16,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",cursor:"pointer",boxShadow:`0 5px 0 #003A99`}}>🔄 De novo</button>
-        <button onClick={()=>{setMode(null);go("map");}} style={{flex:1,padding:14,borderRadius:20,border:`3px solid ${C.gold}`,background:"transparent",color:C.gold,fontSize:16,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",cursor:"pointer"}}>🗺️ Mapa</button>
+        <button onClick={()=>start(mode,nivel)} style={{flex:1,padding:12,borderRadius:20,border:"none",background:`linear-gradient(135deg,${C.blue},${C.blueDk})`,color:"white",fontSize:14,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",cursor:"pointer",boxShadow:`0 5px 0 #003A99`}}>🔄 De novo</button>
+        <button onClick={()=>{setMode(null);go("map");}} style={{flex:1,padding:12,borderRadius:20,border:`3px solid ${C.gold}`,background:"transparent",color:C.gold,fontSize:14,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",cursor:"pointer"}}>🗺️ Mapa</button>
       </div>
     </div>
   );
@@ -805,8 +818,8 @@ function QuizScreen({ go, toast, showBurst }) {
         </div>
       </div>
       <div style={{margin:"8px 14px",borderRadius:24,padding:"20px 14px",background:"linear-gradient(135deg,rgba(0,0,0,0.4),rgba(0,0,0,0.2))",border:`3px solid ${m.color}`,textAlign:"center",boxShadow:`0 0 32px ${m.color}33`}}>
-        <div style={{fontSize:48,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",letterSpacing:4,textShadow:"0 3px 12px rgba(0,0,0,0.5)"}}>
-          {q.q} = <span style={{color:done?(sel===q.ans?C.green:C.red):C.gold,transition:"color 0.3s"}}>{done?sel:"?"}</span>
+        <div style={{fontSize:mode==="contagem"?28:46,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",letterSpacing:mode==="contagem"?2:4,textShadow:"0 3px 12px rgba(0,0,0,0.5)",whiteSpace:"pre-line",lineHeight:1.3}}>
+          {q.q.replace(" = ?","")}<br/><span style={{color:done?(sel===q.ans?C.green:C.red):C.gold,transition:"color 0.3s",fontSize:mode==="contagem"?36:46}}>= {done?sel:"?"}</span>
         </div>
         {done&&<div style={{marginTop:8,fontSize:18,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",color:sel===q.ans?C.green:C.red,animation:"popIn 0.35s ease both"}}>{sel===q.ans?"🎉 CORRETO! +100 XP":`😅 Era ${q.ans}!`}</div>}
       </div>
