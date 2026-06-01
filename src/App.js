@@ -21,7 +21,19 @@ const LiaHero=({sz=80})=>(
   />
 );
 
-export const Star=({on,sz=18})=>(<svg width={sz} height={sz} viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9.5 17,14 18.5,21 12,17.5 5.5,21 7,14 2,9.5 9,9" fill={on?"#FFD700":"#1E3A6E"} stroke={on?"#FF8C00":"#2A4A8E"} strokeWidth="1.2"/></svg>);
+export 
+const DracoImg=({sz=80})=>(
+  <img src="https://raw.githubusercontent.com/Benny-06082426/mathquest/main/public/Dragon.png" alt="Draco"
+    style={{width:sz,height:sz*1.2,objectFit:"contain",filter:"drop-shadow(0 6px 16px rgba(0,0,0,0.4))"}}
+  />
+);
+const NubiImg=({sz=80})=>(
+  <img src="https://raw.githubusercontent.com/Benny-06082426/mathquest/main/public/Nuvem.png" alt="Nubi"
+    style={{width:sz,height:sz,objectFit:"contain",filter:"drop-shadow(0 6px 16px rgba(0,0,0,0.3))"}}
+  />
+);
+
+const Star=({on,sz=18})=>(<svg width={sz} height={sz} viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9.5 17,14 18.5,21 12,17.5 5.5,21 7,14 2,9.5 9,9" fill={on?"#FFD700":"#1E3A6E"} stroke={on?"#FF8C00":"#2A4A8E"} strokeWidth="1.2"/></svg>);
 export const Coin=({sz=18})=>(<svg width={sz} height={sz} viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#FFD700" stroke="#FF8C00" strokeWidth="1.5"/><circle cx="12" cy="12" r="8.5" fill="#FFC107"/><circle cx="12" cy="12" r="6" fill="#FFD700"/><text x="12" y="16" textAnchor="middle" fill="#7B3F00" fontSize="8" fontWeight="900" fontFamily="Arial Black">$</text></svg>);
 
 
@@ -180,8 +192,8 @@ function LoginScreen({ onDone }) {
 
       {/* Mascotes */}
       <div style={{ display:"flex", justifyContent:"space-around", alignItems:"flex-end", width:"100%", zIndex:1, flex:1, minHeight:0 }}>
-        <div style={{ animation:"heroFloat 2.5s ease-in-out infinite", animationDelay:"0.3s", flexShrink:0 }}><MaxHero sz={110}/></div>
-        <div style={{ animation:"heroFloat 2.5s ease-in-out infinite", animationDelay:"0.8s", flexShrink:0 }}><LiaHero sz={100}/></div>
+        <div style={{ animation:"heroFloat 2.5s ease-in-out infinite", animationDelay:"0.3s", flexShrink:0 }}><MaxHero sz={155}/></div>
+        <div style={{ animation:"heroFloat 2.5s ease-in-out infinite", animationDelay:"0.8s", flexShrink:0 }}><LiaHero sz={145}/></div>
       </div>
 
       {/* Botão */}
