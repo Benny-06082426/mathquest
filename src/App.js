@@ -9,9 +9,119 @@ export function gerarCodigo(nome){const n=nome.toUpperCase().replace(/\s/g,"").s
 
 export const ShieldLogo=({s=40})=>(<svg width={s*.9} height={s} viewBox="0 0 80 88"><defs><linearGradient id="sl1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#FFE44D"/><stop offset="100%" stopColor="#FF9800"/></linearGradient><linearGradient id="sl2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#1E90FF"/><stop offset="100%" stopColor="#0047AB"/></linearGradient></defs><path d="M40 3 L76 17 L76 46 Q76 70 40 85 Q4 70 4 46 L4 17Z" fill="url(#sl1)" stroke="#FF8C00" strokeWidth="2"/><path d="M40 9 L70 22 L70 46 Q70 66 40 79 Q10 66 10 46 L10 22Z" fill="url(#sl2)" stroke="#42A5F5" strokeWidth="1"/><path d="M40 16 L56 25 L56 44 Q56 58 40 67 Q24 58 24 44 L24 25Z" fill="#0033AA"/><text x="40" y="51" textAnchor="middle" fill="white" fontSize="26" fontWeight="900" fontFamily="Arial Black">+</text><polygon points="40,3 43,11 52,11 45,16 48,24 40,19 32,24 35,16 28,11 37,11" fill="#FFE44D" stroke="#FF6600" strokeWidth="0.7"/><ellipse cx="18" cy="22" rx="5" ry="5" fill="#4CAF50" stroke="#2E7D32" strokeWidth="1"/><ellipse cx="62" cy="22" rx="5" ry="5" fill="#9C27B0" stroke="#6A1B9A" strokeWidth="1"/></svg>);
 
-export const MaxHero=({sz=80,mood="happy"})=>(<svg width={sz} height={sz*1.3} viewBox="0 0 120 156"><ellipse cx="60" cy="152" rx="28" ry="5" fill="rgba(0,0,0,0.18)"/><path d="M25 90 Q10 115 15 140 L60 128 L105 140 Q110 115 95 90" fill="#1565C0" stroke="#0D47A1" strokeWidth="2"/><path d="M25 90 Q16 110 18 128" stroke="#FFD700" strokeWidth="2.5" fill="none" strokeLinecap="round"/><path d="M95 90 Q104 110 102 128" stroke="#FFD700" strokeWidth="2.5" fill="none" strokeLinecap="round"/><ellipse cx="60" cy="100" rx="26" ry="22" fill="#EF6C00"/><ellipse cx="60" cy="60" rx="32" ry="30" fill="#FF7043"/><polygon points="28,44 18,16 42,34" fill="#FF7043"/><polygon points="92,44 102,16 78,34" fill="#FF7043"/><polygon points="30,42 22,20 40,34" fill="#FFCC02"/><polygon points="90,42 98,20 80,34" fill="#FFCC02"/><ellipse cx="60" cy="67" rx="20" ry="16" fill="#FFE0B2"/><ellipse cx="49" cy="55" rx="7" ry="7.5" fill="#1A1A1A"/><ellipse cx="71" cy="55" rx="7" ry="7.5" fill="#1A1A1A"/><circle cx="51" cy="53" r="2.8" fill="white"/><circle cx="73" cy="53" r="2.8" fill="white"/><circle cx="50" cy="55.5" r="1.4" fill="#5C35BE"/><circle cx="72" cy="55.5" r="1.4" fill="#5C35BE"/><path d="M43 47 Q49 44 55 47" stroke="#1A1A1A" strokeWidth="2" fill="none" strokeLinecap="round"/><path d="M65 47 Q71 44 77 47" stroke="#1A1A1A" strokeWidth="2" fill="none" strokeLinecap="round"/><ellipse cx="60" cy="64" rx="3.5" ry="2.5" fill="#BF360C"/>{mood==="happy"&&<path d="M50 71 Q60 80 70 71" stroke="#BF360C" strokeWidth="2.5" fill="none" strokeLinecap="round"/>}{mood==="sad"&&<path d="M50 76 Q60 68 70 76" stroke="#BF360C" strokeWidth="2.5" fill="none" strokeLinecap="round"/>}{mood==="wow"&&<ellipse cx="60" cy="73" rx="6" ry="5" fill="#BF360C"/>}<ellipse cx="41" cy="66" rx="7" ry="4.5" fill="#FFAB91" opacity="0.7"/><ellipse cx="79" cy="66" rx="7" ry="4.5" fill="#FFAB91" opacity="0.7"/><rect x="92" y="34" width="6" height="36" rx="3" fill="#CFD8DC" stroke="#90A4AE" strokeWidth="1"/><rect x="86" y="34" width="18" height="7" rx="3.5" fill="#FFD700" stroke="#FF8C00" strokeWidth="1"/><rect x="93" y="24" width="5" height="12" rx="2.5" fill="#ECEFF1"/><circle cx="95.5" cy="69" r="4" fill="#FFD700" stroke="#FF8C00" strokeWidth="1"/><rect x="34" y="88" width="52" height="8" rx="4" fill="#4E342E"/><rect x="55" y="87" width="10" height="10" rx="3" fill="#FFD700" stroke="#FF8C00" strokeWidth="1"/></svg>);
+export const MaxHero=({sz=80,mood="happy"})=>(<svg width={sz} height={sz*1.35} viewBox="0 0 140 189">
+  <defs>
+    <radialGradient id="mxbody" cx="50%" cy="40%" r="60%"><stop offset="0%" stopColor="#FF8A65"/><stop offset="100%" stopColor="#E64A19"/></radialGradient>
+    <radialGradient id="mxhead" cx="50%" cy="30%" r="60%"><stop offset="0%" stopColor="#FF7043"/><stop offset="100%" stopColor="#BF360C"/></radialGradient>
+  </defs>
+  {/* Sombra */}
+  <ellipse cx="70" cy="185" rx="32" ry="6" fill="rgba(0,0,0,0.2)"/>
+  {/* Capa traseira */}
+  <path d="M32 105 Q14 130 20 158 L70 144 L120 158 Q126 130 108 105" fill="#1565C0"/>
+  <path d="M32 105 Q20 128 22 148" stroke="#FFD700" strokeWidth="3" fill="none" strokeLinecap="round"/>
+  <path d="M108 105 Q120 128 118 148" stroke="#FFD700" strokeWidth="3" fill="none" strokeLinecap="round"/>
+  {/* Corpo */}
+  <ellipse cx="70" cy="118" rx="30" ry="28" fill="url(#mxbody)"/>
+  {/* Barriga clara */}
+  <ellipse cx="70" cy="124" rx="18" ry="18" fill="#FFCCBC"/>
+  {/* Cinto */}
+  <rect x="40" y="108" width="60" height="9" rx="4.5" fill="#4E342E"/>
+  <rect x="64" y="107" width="12" height="11" rx="3" fill="#FFD700" stroke="#FF8C00" strokeWidth="1.5"/>
+  {/* Cabeça */}
+  <ellipse cx="70" cy="66" rx="36" ry="34" fill="url(#mxhead)"/>
+  {/* Orelhas/pontas */}
+  <polygon points="32,50 20,18 48,38" fill="#FF7043"/>
+  <polygon points="108,50 120,18 92,38" fill="#FF7043"/>
+  <polygon points="34,48 24,22 46,38" fill="#FFCA28"/>
+  <polygon points="106,48 116,22 94,38" fill="#FFCA28"/>
+  {/* Rosto claro */}
+  <ellipse cx="70" cy="74" rx="24" ry="20" fill="#FFCCBC"/>
+  {/* Olhos */}
+  <ellipse cx="57" cy="62" rx="9" ry="10" fill="white"/>
+  <ellipse cx="83" cy="62" rx="9" ry="10" fill="white"/>
+  <ellipse cx="57" cy="63" rx="6" ry="7" fill="#1A237E"/>
+  <ellipse cx="83" cy="63" rx="6" ry="7" fill="#1A237E"/>
+  <ellipse cx="57" cy="63" rx="3.5" ry="4" fill="#0D0D0D"/>
+  <ellipse cx="83" cy="63" rx="3.5" ry="4" fill="#0D0D0D"/>
+  <circle cx="59" cy="61" r="2" fill="white"/>
+  <circle cx="85" cy="61" r="2" fill="white"/>
+  {/* Sobrancelhas */}
+  <path d="M48 54 Q57 50 66 54" stroke="#4E2C00" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+  <path d="M74 54 Q83 50 92 54" stroke="#4E2C00" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+  {/* Nariz */}
+  <ellipse cx="70" cy="72" rx="4" ry="3" fill="#BF360C"/>
+  {/* Boca */}
+  {mood==="happy"&&<path d="M58 80 Q70 92 82 80" stroke="#BF360C" strokeWidth="3" fill="none" strokeLinecap="round"/>}
+  {mood==="sad"&&<path d="M58 86 Q70 76 82 86" stroke="#BF360C" strokeWidth="3" fill="none" strokeLinecap="round"/>}
+  {mood==="wow"&&<ellipse cx="70" cy="84" rx="8" ry="7" fill="#BF360C"/>}
+  {/* Bochechas */}
+  <ellipse cx="44" cy="76" rx="9" ry="6" fill="#FF8A65" opacity="0.6"/>
+  <ellipse cx="96" cy="76" rx="9" ry="6" fill="#FF8A65" opacity="0.6"/>
+  {/* Espada */}
+  <rect x="108" y="36" width="7" height="44" rx="3.5" fill="#ECEFF1" stroke="#B0BEC5" strokeWidth="1"/>
+  <rect x="100" y="36" width="22" height="8" rx="4" fill="#FFD700" stroke="#FF8C00" strokeWidth="1.5"/>
+  <rect x="110" y="24" width="6" height="14" rx="3" fill="#CFD8DC"/>
+  <circle cx="113" cy="79" r="5" fill="#FFD700" stroke="#FF8C00" strokeWidth="1.5"/>
+</svg>);
 
-export const LiaHero=({sz=80})=>(<svg width={sz} height={sz*1.3} viewBox="0 0 120 156"><ellipse cx="60" cy="152" rx="28" ry="5" fill="rgba(0,0,0,0.18)"/><path d="M25 90 Q10 115 15 140 L60 128 L105 140 Q110 115 95 90" fill="#6A1B9A" stroke="#4A148C" strokeWidth="2"/><path d="M25 90 Q16 110 18 128" stroke="#CE93D8" strokeWidth="2.5" fill="none" strokeLinecap="round"/><path d="M95 90 Q104 110 102 128" stroke="#CE93D8" strokeWidth="2.5" fill="none" strokeLinecap="round"/><ellipse cx="60" cy="100" rx="26" ry="22" fill="#F48FB1"/><ellipse cx="60" cy="60" rx="32" ry="30" fill="#F06292"/><ellipse cx="60" cy="38" rx="34" ry="20" fill="#5D4037"/><path d="M26 44 Q20 60 28 75" stroke="#5D4037" strokeWidth="12" strokeLinecap="round" fill="none"/><path d="M94 44 Q100 60 92 75" stroke="#5D4037" strokeWidth="12" strokeLinecap="round" fill="none"/><path d="M36 36 Q50 28 60 36 Q50 44 36 36Z" fill="#E91E63"/><path d="M84 36 Q70 28 60 36 Q70 44 84 36Z" fill="#E91E63"/><circle cx="60" cy="36" r="5" fill="#FF4081"/><ellipse cx="60" cy="67" rx="20" ry="16" fill="#FCE4EC"/><ellipse cx="49" cy="55" rx="7" ry="7.5" fill="#1A1A1A"/><ellipse cx="71" cy="55" rx="7" ry="7.5" fill="#1A1A1A"/><circle cx="51" cy="53" r="2.8" fill="white"/><circle cx="73" cy="53" r="2.8" fill="white"/><ellipse cx="60" cy="64" rx="3.5" ry="2.5" fill="#880E4F"/><path d="M50 71 Q60 80 70 71" stroke="#880E4F" strokeWidth="2.5" fill="none" strokeLinecap="round"/><ellipse cx="41" cy="66" rx="7" ry="4.5" fill="#F48FB1" opacity="0.8"/><ellipse cx="79" cy="66" rx="7" ry="4.5" fill="#F48FB1" opacity="0.8"/><rect x="18" y="30" width="5" height="40" rx="2.5" fill="#6D4C41"/><polygon points="20.5,30 14,16 27,16" fill="#FFD700"/><circle cx="20.5" cy="16" r="8" fill="#9C27B0" stroke="#7B1FA2" strokeWidth="1.5" opacity="0.9"/><circle cx="20.5" cy="16" r="4" fill="#E1BEE7"/></svg>);
+export const LiaHero=({sz=80})=>(<svg width={sz} height={sz*1.35} viewBox="0 0 140 189">
+  <defs>
+    <radialGradient id="liabody" cx="50%" cy="40%" r="60%"><stop offset="0%" stopColor="#F48FB1"/><stop offset="100%" stopColor="#C2185B"/></radialGradient>
+  </defs>
+  {/* Sombra */}
+  <ellipse cx="70" cy="185" rx="32" ry="6" fill="rgba(0,0,0,0.2)"/>
+  {/* Manto */}
+  <path d="M32 105 Q14 130 20 158 L70 144 L120 158 Q126 130 108 105" fill="#6A1B9A"/>
+  <path d="M32 105 Q20 128 22 148" stroke="#CE93D8" strokeWidth="3" fill="none" strokeLinecap="round"/>
+  <path d="M108 105 Q120 128 118 148" stroke="#CE93D8" strokeWidth="3" fill="none" strokeLinecap="round"/>
+  {/* Estrelas no manto */}
+  <text x="50" y="135" fontSize="10" fill="#FFD700" opacity="0.8">✦</text>
+  <text x="80" y="148" fontSize="8" fill="#FFD700" opacity="0.7">✦</text>
+  {/* Corpo */}
+  <ellipse cx="70" cy="118" rx="30" ry="28" fill="url(#liabody)"/>
+  <ellipse cx="70" cy="124" rx="18" ry="18" fill="#FCE4EC"/>
+  {/* Cinto */}
+  <rect x="42" y="108" width="56" height="8" rx="4" fill="#4A148C"/>
+  <ellipse cx="70" cy="112" rx="8" ry="6" fill="#9C27B0" stroke="#7B1FA2" strokeWidth="1"/>
+  <ellipse cx="70" cy="112" rx="4" ry="3" fill="#E1BEE7"/>
+  {/* Cabeça */}
+  <ellipse cx="70" cy="66" rx="36" ry="34" fill="#F06292"/>
+  {/* Cabelo */}
+  <ellipse cx="70" cy="42" rx="38" ry="22" fill="#4E342E"/>
+  <path d="M30 52 Q22 72 30 90" stroke="#4E342E" strokeWidth="14" strokeLinecap="round" fill="none"/>
+  <path d="M110 52 Q118 72 110 90" stroke="#4E342E" strokeWidth="14" strokeLinecap="round" fill="none"/>
+  {/* Laço de cabelo */}
+  <path d="M42 42 Q56 32 70 40 Q56 50 42 42Z" fill="#E91E63"/>
+  <path d="M98 42 Q84 32 70 40 Q84 50 98 42Z" fill="#E91E63"/>
+  <circle cx="70" cy="40" r="6" fill="#FF4081"/>
+  {/* Rosto claro */}
+  <ellipse cx="70" cy="74" rx="24" ry="20" fill="#FCE4EC"/>
+  {/* Olhos */}
+  <ellipse cx="57" cy="62" rx="9" ry="10" fill="white"/>
+  <ellipse cx="83" cy="62" rx="9" ry="10" fill="white"/>
+  <ellipse cx="57" cy="63" rx="6" ry="7" fill="#880E4F"/>
+  <ellipse cx="83" cy="63" rx="6" ry="7" fill="#880E4F"/>
+  <ellipse cx="57" cy="63" rx="3.5" ry="4" fill="#0D0D0D"/>
+  <ellipse cx="83" cy="63" rx="3.5" ry="4" fill="#0D0D0D"/>
+  <circle cx="59" cy="61" r="2" fill="white"/>
+  <circle cx="85" cy="61" r="2" fill="white"/>
+  {/* Cílios */}
+  <path d="M48 54 Q57 51 64 55" stroke="#880E4F" strokeWidth="2" fill="none" strokeLinecap="round"/>
+  <path d="M76 55 Q83 51 92 54" stroke="#880E4F" strokeWidth="2" fill="none" strokeLinecap="round"/>
+  {/* Nariz */}
+  <ellipse cx="70" cy="72" rx="3.5" ry="2.5" fill="#C2185B"/>
+  {/* Sorriso */}
+  <path d="M59 80 Q70 91 81 80" stroke="#C2185B" strokeWidth="3" fill="none" strokeLinecap="round"/>
+  {/* Bochechas */}
+  <ellipse cx="45" cy="76" rx="9" ry="6" fill="#F48FB1" opacity="0.7"/>
+  <ellipse cx="95" cy="76" rx="9" ry="6" fill="#F48FB1" opacity="0.7"/>
+  {/* Varinha */}
+  <rect x="14" y="34" width="6" height="48" rx="3" fill="#6D4C41" stroke="#4E342E" strokeWidth="1"/>
+  <polygon points="17,34 9,16 25,16" fill="#FFD700" stroke="#FF8C00" strokeWidth="1"/>
+  <circle cx="17" cy="16" r="10" fill="#9C27B0" stroke="#7B1FA2" strokeWidth="2"/>
+  <circle cx="17" cy="16" r="5" fill="#E1BEE7"/>
+  <text x="13" y="20" fontSize="6" fill="#FFD700">✦</text>
+</svg>);
 
 export const Star=({on,sz=18})=>(<svg width={sz} height={sz} viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9.5 17,14 18.5,21 12,17.5 5.5,21 7,14 2,9.5 9,9" fill={on?"#FFD700":"#1E3A6E"} stroke={on?"#FF8C00":"#2A4A8E"} strokeWidth="1.2"/></svg>);
 export const Coin=({sz=18})=>(<svg width={sz} height={sz} viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#FFD700" stroke="#FF8C00" strokeWidth="1.5"/><circle cx="12" cy="12" r="8.5" fill="#FFC107"/><circle cx="12" cy="12" r="6" fill="#FFD700"/><text x="12" y="16" textAnchor="middle" fill="#7B3F00" fontSize="8" fontWeight="900" fontFamily="Arial Black">$</text></svg>);
@@ -156,21 +266,28 @@ function LoginScreen({ onDone }) {
 
   /* SPLASH */
   if (step === "splash") return (
-    <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"space-between", padding:"36px 28px 48px", background:"linear-gradient(180deg,#1565C0 0%,#0D47A1 40%,#0A2D6E 100%)", position:"relative", overflow:"hidden" }}>
-      <div style={{ position:"absolute", inset:0 }}>
-        {Array.from({length:18}).map((_,i)=>(<div key={i} style={{ position:"absolute", left:`${Math.random()*90+5}%`, top:`${Math.random()*60+5}%`, width:2+Math.random()*3, height:2+Math.random()*3, borderRadius:"50%", background:"white", opacity:0.3+Math.random()*0.5, animation:`twinkle ${1.5+Math.random()*2}s ease-in-out infinite`, animationDelay:`${Math.random()*3}s` }}/>))}
-        {[[4,7],[58,4],[80,11],[20,17]].map(([x,y],i)=>(<div key={i} style={{ position:"absolute", left:`${x}%`, top:`${y}%`, fontSize:28+i*8, opacity:0.18, animation:`cloudDrift ${4+i}s ease-in-out infinite` }}>☁️</div>))}
+    <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", padding:"28px 24px 36px", background:"linear-gradient(180deg,#1565C0 0%,#0D47A1 50%,#0A2D6E 100%)", position:"relative", overflow:"hidden", gap:0 }}>
+      {/* Fundo estrelas */}
+      <div style={{ position:"absolute", inset:0, pointerEvents:"none" }}>
+        {[...Array(14)].map((_,i)=>(<div key={i} style={{ position:"absolute", left:`${[8,18,30,45,60,72,85,12,55,78,25,65,40,90][i]}%`, top:`${[10,25,8,18,6,28,14,40,35,50,55,45,60,20][i]}%`, width:i%3===0?3:2, height:i%3===0?3:2, borderRadius:"50%", background:"white", opacity:0.6, animation:`twinkle ${1.5+i*0.2}s ease-in-out infinite`, animationDelay:`${i*0.3}s` }}/>))}
+        {[[3,5],[60,3],[82,10]].map(([x,y],i)=>(<div key={i} style={{ position:"absolute", left:`${x}%`, top:`${y}%`, fontSize:22+i*6, opacity:0.2 }}>☁️</div>))}
       </div>
-      <div style={{ zIndex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
-        <div style={{ animation:"heroFloat 3s ease-in-out infinite" }}><ShieldLogo s={80}/></div>
-        <div style={{ fontSize:54, fontWeight:900, color:"white", fontFamily:"'Fredoka One',sans-serif", lineHeight:1, marginTop:6, textShadow:"0 4px 0 #0033AA, 0 8px 20px #00000066" }}>Math<span style={{ color:C.gold }}>Quest</span></div>
-        <div style={{ fontSize:12, color:"#90CAF9", fontWeight:700, marginTop:6, letterSpacing:1, textAlign:"center" }}>APRENDER MATEMÁTICA NUNCA FOI TÃO DIVERTIDO!</div>
+
+      {/* Logo + título */}
+      <div style={{ zIndex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:2, marginBottom:8 }}>
+        <div style={{ animation:"heroFloat 3s ease-in-out infinite" }}><ShieldLogo s={72}/></div>
+        <div style={{ fontSize:48, fontWeight:900, color:"white", fontFamily:"'Fredoka One',sans-serif", lineHeight:1, textShadow:"0 4px 0 #0033AA, 0 8px 20px #00000066" }}>Math<span style={{ color:C.gold }}>Quest</span></div>
+        <div style={{ fontSize:11, color:"#90CAF9", fontWeight:700, letterSpacing:1, textAlign:"center" }}>APRENDER MATEMÁTICA NUNCA FOI TÃO DIVERTIDO!</div>
       </div>
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-end", width:"100%", zIndex:1 }}>
-        <div style={{ animation:"heroFloat 2.5s ease-in-out infinite", animationDelay:"0.3s" }}><MaxHero sz={130}/></div>
-        <div style={{ animation:"heroFloat 2.5s ease-in-out infinite", animationDelay:"0.8s" }}><LiaHero sz={120}/></div>
+
+      {/* Mascotes */}
+      <div style={{ display:"flex", justifyContent:"space-around", alignItems:"flex-end", width:"100%", zIndex:1, flex:1, minHeight:0 }}>
+        <div style={{ animation:"heroFloat 2.5s ease-in-out infinite", animationDelay:"0.3s", flexShrink:0 }}><MaxHero sz={110}/></div>
+        <div style={{ animation:"heroFloat 2.5s ease-in-out infinite", animationDelay:"0.8s", flexShrink:0 }}><LiaHero sz={100}/></div>
       </div>
-      <button onClick={() => setStep("welcome")} style={{ width:"100%", padding:"18px 0", borderRadius:40, border:"none", zIndex:1, background:"linear-gradient(135deg,#2ECC71,#1B8A3A)", color:"white", fontSize:22, fontWeight:900, fontFamily:"'Fredoka One',sans-serif", cursor:"pointer", letterSpacing:2, boxShadow:"0 6px 0 #145A20, 0 10px 28px #00000055" }}>COMEÇAR</button>
+
+      {/* Botão */}
+      <button onClick={() => setStep("welcome")} style={{ width:"100%", padding:"16px 0", borderRadius:40, border:"none", zIndex:1, background:"linear-gradient(135deg,#2ECC71,#1B8A3A)", color:"white", fontSize:22, fontWeight:900, fontFamily:"'Fredoka One',sans-serif", cursor:"pointer", letterSpacing:2, boxShadow:"0 6px 0 #145A20, 0 10px 28px #00000055", marginTop:12, flexShrink:0 }}>COMEÇAR</button>
     </div>
   );
 
