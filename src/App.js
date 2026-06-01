@@ -378,69 +378,250 @@ const NODES=[
 function MapScreen({ go, toast }) {
   const usuario = Storage.get("mq_usuario_atual");
   const nomeAluno = usuario?.nome || "Herói";
+  const [regiaoAtiva, setRegiaoAtiva] = useState(0);
+
+  const REGIOES = [
+    {
+      id:0, nome:"1. Reino dos Números", serie:"1º Ano", cor:"#2E7D32", corClaro:"#4CAF50",
+      bg:"linear-gradient(135deg,#1B5E20,#2E7D32)", emoji:"🏰",
+      temas:["Contagem","Números","Soma","Subtração"],
+      fases:[
+        {n:1,stars:3,done:true},{n:2,stars:3,done:true},{n:3,stars:2,done:true},
+        {n:4,stars:1,done:true},{n:5,stars:0,current:true}
+      ]
+    },
+    {
+      id:1, nome:"2. Floresta da Multiplicação", serie:"2º Ano", cor:"#1565C0", corClaro:"#42A5F5",
+      bg:"linear-gradient(135deg,#0D47A1,#1565C0)", emoji:"🍄",
+      temas:["Adição","Subtração","Multiplicação","Problemas"],
+      fases:[
+        {n:6,stars:0,locked:true},{n:7,stars:0,locked:true},{n:8,stars:0,locked:true},
+        {n:9,stars:0,locked:true},{n:10,stars:0,locked:true}
+      ]
+    },
+    {
+      id:2, nome:"3. Ilha do Castelo Mágico", serie:"3º Ano", cor:"#6A1B9A", corClaro:"#9C27B0",
+      bg:"linear-gradient(135deg,#4A148C,#6A1B9A)", emoji:"🔮",
+      temas:["Multiplicação","Divisão","Frações","Problemas"],
+      fases:[
+        {n:11,stars:0,locked:true},{n:12,stars:0,locked:true},{n:13,stars:0,locked:true},
+        {n:14,stars:0,locked:true},{n:15,stars:0,locked:true}
+      ]
+    },
+    {
+      id:3, nome:"4. Montanha das Operações", serie:"4º Ano", cor:"#0277BD", corClaro:"#29B6F6",
+      bg:"linear-gradient(135deg,#01579B,#0277BD)", emoji:"🏔️",
+      temas:["Frações","Decimais","Medidas","Geometria"],
+      fases:[
+        {n:16,stars:0,locked:true},{n:17,stars:0,locked:true},{n:18,stars:0,locked:true},
+        {n:19,stars:0,locked:true},{n:20,stars:0,locked:true}
+      ]
+    },
+    {
+      id:4, nome:"5. Arena dos Desafios", serie:"5º Ano", cor:"#BF360C", corClaro:"#FF5722",
+      bg:"linear-gradient(135deg,#870000,#BF360C)", emoji:"🌋",
+      temas:["Frações Avançadas","Porcentagem","Razão e Proporção","Desafios Lógicos"],
+      fases:[
+        {n:21,stars:0,locked:true},{n:22,stars:0,locked:true},{n:23,stars:0,locked:true},
+        {n:24,stars:0,locked:true},{n:25,stars:0,locked:true}
+      ]
+    },
+  ];
+
+  const regiao = REGIOES[regiaoAtiva];
+
+  const BG_COLORS = [
+    "linear-gradient(180deg,#87CEEB 0%,#B0E8FF 30%,#76C442 55%,#4E9227 100%)",
+    "linear-gradient(180deg,#1A237E 0%,#283593 30%,#2E7D32 60%,#1B5E20 100%)",
+    "linear-gradient(180deg,#311B92 0%,#4527A0 35%,#4A148C 65%,#212121 100%)",
+    "linear-gradient(180deg,#0D47A1 0%,#01579B 30%,#E0E0E0 60%,#BDBDBD 100%)",
+    "linear-gradient(180deg,#212121 0%,#4E342E 30%,#BF360C 60%,#870000 100%)",
+  ];
+
+  const BIOME_EMOJIS = [
+    {trees:["🌲","🌳","🌿"], deco:["🏰","⛅","🌸"], ground:"#4CAF50"},
+    {trees:["🍄","🌲","🌿"], deco:["🏯","🌙","💧"], ground:"#2E7D32"},
+    {trees:["🔮","🌲","✨"], deco:["🏰","⭐","🌙"], ground:"#4A148C"},
+    {trees:["❄️","🏔️","💎"], deco:["🏯","⛄","🔷"], ground:"#546E7A"},
+    {trees:["🌋","💀","🔥"], deco:["🏰","☄️","💥"], ground:"#4E342E"},
+  ];
+
+  const biome = BIOME_EMOJIS[regiaoAtiva];
+
   return (
-    <div style={{ flex:1, position:"relative", overflow:"hidden" }}>
-      {/* BG */}
-      <div style={{ position:"absolute", inset:0, background:"linear-gradient(180deg,#87CEEB 0%,#B0E8FF 35%,#76C442 60%,#4E9227 100%)" }}/>
-      {/* Sol */}
-      <div style={{ position:"absolute", top:"5%", right:"8%", width:52, height:52, borderRadius:"50%", background:"radial-gradient(circle,#FFF176,#FFEE58,#FF8F00)", boxShadow:"0 0 30px #FFEE5888" }}/>
-      {/* Nuvens */}
-      {[[4,6],[42,4],[76,8],[18,14]].map(([x,y],i)=>(
-        <div key={i} style={{ position:"absolute", left:`${x}%`, top:`${y}%`, animation:`cloudDrift ${4.5+i}s ease-in-out infinite`, animationDelay:`${i*1.1}s` }}>
-          <div style={{ position:"relative" }}>
-            <div style={{ width:50+i*15, height:24+i*6, borderRadius:50, background:"white", opacity:0.92 }}/>
-            <div style={{ position:"absolute", top:-10, left:10, width:30+i*8, height:28+i*4, borderRadius:50, background:"white", opacity:0.92 }}/>
-            <div style={{ position:"absolute", top:-6, right:8, width:20+i*6, height:22+i*3, borderRadius:50, background:"white", opacity:0.92 }}/>
+    <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden" }}>
+
+      {/* MAPA */}
+      <div style={{ flex:1, position:"relative", overflow:"hidden" }}>
+        {/* Background */}
+        <div style={{ position:"absolute", inset:0, background:BG_COLORS[regiaoAtiva], transition:"background 0.5s" }}/>
+
+        {/* Sol / Lua */}
+        {regiaoAtiva <= 1 && <div style={{ position:"absolute", top:"6%", right:"8%", width:48, height:48, borderRadius:"50%", background:"radial-gradient(circle,#FFF176,#FFEE58,#FF8F00)", boxShadow:"0 0 30px #FFEE5888" }}/>}
+        {regiaoAtiva >= 2 && <div style={{ position:"absolute", top:"6%", right:"8%", fontSize:36 }}>🌙</div>}
+
+        {/* Nuvens */}
+        {regiaoAtiva <= 1 && [[4,6],[42,4],[76,8]].map(([x,y],i)=>(
+          <div key={i} style={{ position:"absolute", left:`${x}%`, top:`${y}%`, animation:`cloudDrift ${4+i}s ease-in-out infinite` }}>
+            <div style={{ width:50+i*15, height:22+i*5, borderRadius:50, background:"white", opacity:0.85, position:"relative" }}>
+              <div style={{ position:"absolute", top:-8, left:8, width:28+i*6, height:24+i*4, borderRadius:50, background:"white" }}/>
+            </div>
+          </div>
+        ))}
+
+        {/* Decoração bioma */}
+        {[[5,60],[8,72],[88,58],[92,70],[2,82],[90,82]].map(([x,y],i)=>(
+          <div key={i} style={{ position:"absolute", left:`${x}%`, top:`${y}%`, fontSize:18+i*2, filter:"drop-shadow(0 2px 4px rgba(0,0,0,0.3))" }}>
+            {biome.trees[i%biome.trees.length]}
+          </div>
+        ))}
+
+        {/* Edificio/castelo do reino */}
+        <div style={{ position:"absolute", top:"8%", left:"50%", transform:"translateX(-50%)", textAlign:"center" }}>
+          <div style={{ fontSize:52, filter:"drop-shadow(0 4px 12px rgba(0,0,0,0.5))", animation:"heroFloat 3s ease-in-out infinite" }}>
+            {biome.deco[0]}
           </div>
         </div>
-      ))}
-      {/* Castelo fundo */}
-      <div style={{ position:"absolute", top:"8%", left:"50%", transform:"translateX(-50%)", fontSize:60, opacity:0.4 }}>🏰</div>
-      {/* Árvores */}
-      {[[2,54],[8,62],[86,50],[93,62],[3,74],[87,72]].map(([x,y],i)=>(
-        <div key={i} style={{ position:"absolute", left:`${x}%`, top:`${y}%`, fontSize:22+i*3 }}>🌲</div>
-      ))}
-      {/* Caminho */}
-      <svg style={{ position:"absolute", inset:0, width:"100%", height:"100%", pointerEvents:"none" }}>
-        {NODES.slice(0,-1).map((n,i)=>{const nx=NODES[i+1];return(<g key={i}>
-          <line x1={`${n.x}%`} y1={`${n.y}%`} x2={`${nx.x}%`} y2={`${nx.y}%`} stroke="#7B4F1A" strokeWidth="14" strokeLinecap="round" opacity="0.5"/>
-          <line x1={`${n.x}%`} y1={`${n.y}%`} x2={`${nx.x}%`} y2={`${nx.y}%`} stroke="#D4A96A" strokeWidth="9" strokeLinecap="round" strokeDasharray="14 9"/>
-          <line x1={`${n.x}%`} y1={`${n.y}%`} x2={`${nx.x}%`} y2={`${nx.y}%`} stroke="rgba(255,255,255,0.25)" strokeWidth="3" strokeLinecap="round" strokeDasharray="8 14"/>
-        </g>);})}
-      </svg>
-      {/* Nodes */}
-      {NODES.map(nd=>(
-        <div key={nd.id} onClick={()=>{ if(nd.state==="locked"){toast("🔒","Fase bloqueada!","info");return;} go("quiz"); }}
-          style={{ position:"absolute", left:`${nd.x}%`, top:`${nd.y}%`, transform:"translate(-50%,-50%)", display:"flex", flexDirection:"column", alignItems:"center", gap:3, cursor:nd.state==="locked"?"not-allowed":"pointer", zIndex:10 }}>
-          {nd.state==="current"&&<div style={{ position:"absolute", width:80, height:80, borderRadius:"50%", background:"radial-gradient(circle,#FFD70066,transparent 70%)", animation:"ringPulse 1.6s ease-in-out infinite", top:"50%", left:"50%", transform:"translate(-50%,-50%) translateY(-32px)" }}/>}
-          <div style={{ width:58, height:58, borderRadius:"50%",
-            background:nd.state==="current"?"linear-gradient(135deg,#FFD700,#FF8C00)":nd.state==="done"?"linear-gradient(135deg,#2ECC71,#1B8A3A)":"linear-gradient(135deg,#37474F,#1C313A)",
-            border:nd.state==="current"?"5px solid #FFF9C4":nd.state==="done"?"5px solid #A5D6A7":"5px solid #546E7A",
-            display:"flex", alignItems:"center", justifyContent:"center", fontSize:26,
-            boxShadow:nd.state==="current"?"0 0 28px #FFD700AA, 0 6px 20px #00000066":"0 4px 12px #00000044" }}>
-            {nd.state==="locked"?"🔒":nd.icon}
+
+        {/* Banner do reino */}
+        <div style={{ position:"absolute", top:"22%", left:"50%", transform:"translateX(-50%)", zIndex:10, textAlign:"center", width:"90%" }}>
+          <div style={{ background:regiao.bg, borderRadius:24, padding:"8px 20px", border:`3px solid ${regiao.corClaro}`, boxShadow:`0 4px 20px rgba(0,0,0,0.4), 0 0 0 1px ${regiao.corClaro}44`, display:"inline-block" }}>
+            <div style={{ fontSize:13, fontWeight:900, color:"white", fontFamily:"'Fredoka One',sans-serif", textShadow:"0 2px 4px rgba(0,0,0,0.4)" }}>{regiao.nome}</div>
+            <div style={{ fontSize:10, color:regiao.corClaro, fontWeight:700 }}>{regiao.serie}</div>
           </div>
-          {nd.state==="done"&&<div style={{ display:"flex", gap:1 }}>{[1,2,3].map(s=><Star key={s} on={s<=nd.stars} sz={14}/>)}</div>}
-          <div style={{ background:nd.state==="current"?C.gold:"rgba(0,0,0,0.78)", color:nd.state==="current"?C.dark:"white", fontSize:10, fontWeight:900, padding:"3px 10px", borderRadius:20, fontFamily:"'Fredoka One',sans-serif", whiteSpace:"nowrap", border:nd.state==="current"?`2px solid ${C.goldDk}`:"1px solid rgba(255,255,255,0.2)" }}>{nd.label}</div>
-          {nd.state==="current"&&<div style={{ marginTop:-4, animation:"heroFloat 1.2s ease-in-out infinite" }}><MaxHero sz={44}/></div>}
         </div>
-      ))}
-      {/* Missão do dia */}
-      <div style={{ position:"absolute", bottom:8, left:8, right:8, background:"linear-gradient(135deg,#4527A0,#6A1B9A)", borderRadius:20, padding:"11px 14px", border:"3px solid #CE93D8", display:"flex", alignItems:"center", gap:10, boxShadow:"0 8px 28px rgba(0,0,0,0.5)" }}>
-        <div style={{ fontSize:30, animation:"float 2s ease-in-out infinite" }}>⚡</div>
-        <div style={{ flex:1 }}>
-          <div style={{ fontSize:13, fontWeight:900, color:C.gold, fontFamily:"'Fredoka One',sans-serif" }}>OLÁ, {nomeAluno.toUpperCase()}! MISSÃO DO DIA!</div>
-          <div style={{ fontSize:11, color:"#E1BEE7", fontWeight:700 }}>Complete 5 desafios · Ganhe 200 moedas</div>
+
+        {/* FASES — layout em zigue-zague */}
+        <div style={{ position:"absolute", top:"36%", left:0, right:0, bottom:"14%", overflow:"hidden" }}>
+          {/* Caminho pontilhado SVG */}
+          <svg style={{ position:"absolute", inset:0, width:"100%", height:"100%", pointerEvents:"none" }} preserveAspectRatio="none">
+            <path
+              d="M 15% 85% C 25% 75% 40% 90% 50% 78% S 70% 68% 85% 75% S 90% 50% 75% 42% S 55% 30% 50% 20% S 30% 12% 20% 22%"
+              stroke="white" strokeWidth="3" strokeDasharray="8 6" fill="none" opacity="0.5"
+            />
+          </svg>
+
+          {/* Fases posicionadas */}
+          {[
+            [14,80],[32,68],[50,76],[68,62],[85,72],
+          ].map(([x,y],i)=>{
+            const fase = regiao.fases[i];
+            if(!fase) return null;
+            const isCurrent = fase.current;
+            const isDone = fase.done;
+            const isLocked = fase.locked;
+
+            return (
+              <div key={i}
+                onClick={()=>{
+                  if(isLocked){toast("🔒",`Complete a fase ${fase.n-1} primeiro!`,"info");return;}
+                  go("quiz");
+                }}
+                style={{ position:"absolute", left:`${x}%`, top:`${y}%`, transform:"translate(-50%,-50%)",
+                  display:"flex", flexDirection:"column", alignItems:"center", gap:3,
+                  cursor:isLocked?"not-allowed":"pointer", zIndex:10 }}>
+
+                {/* Brilho fase atual */}
+                {isCurrent && <div style={{ position:"absolute", width:72, height:72, borderRadius:"50%",
+                  background:`radial-gradient(circle,${regiao.corClaro}66,transparent 70%)`,
+                  animation:"ringPulse 1.6s ease-in-out infinite",
+                  top:"50%", left:"50%", transform:"translate(-50%,-50%) translateY(-20px)" }}/>}
+
+                {/* Círculo da fase */}
+                <div style={{
+                  width:52, height:52, borderRadius:"50%",
+                  background: isCurrent ? `linear-gradient(135deg,${C.gold},${C.goldDk})`
+                    : isDone ? `linear-gradient(135deg,${regiao.corClaro},${regiao.cor})`
+                    : "linear-gradient(135deg,#546E7A,#37474F)",
+                  border: isCurrent ? `4px solid #FFF9C4`
+                    : isDone ? `4px solid rgba(255,255,255,0.5)`
+                    : "4px solid #607D8B",
+                  display:"flex", alignItems:"center", justifyContent:"center",
+                  fontSize: isLocked ? 22 : 20, fontWeight:900,
+                  color: isCurrent ? C.dark : "white",
+                  fontFamily:"'Fredoka One',sans-serif",
+                  boxShadow: isCurrent ? `0 0 24px ${C.gold}AA, 0 6px 16px rgba(0,0,0,0.5)`
+                    : isDone ? `0 4px 12px rgba(0,0,0,0.4)`
+                    : "0 3px 8px rgba(0,0,0,0.4)",
+                }}>
+                  {isLocked ? "🔒" : fase.n}
+                </div>
+
+                {/* Estrelas */}
+                {(isDone || isCurrent) && <div style={{ display:"flex", gap:1 }}>
+                  {[1,2,3].map(s=><Star key={s} on={s <= (fase.stars||0)} sz={12}/>)}
+                </div>}
+
+                {/* Max na fase atual */}
+                {isCurrent && (
+                  <div style={{ marginTop:-2, animation:"heroFloat 1.2s ease-in-out infinite" }}>
+                    <MaxHero sz={38}/>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
-        <button onClick={()=>go("quiz")} style={{ background:`linear-gradient(135deg,${C.gold},${C.goldDk})`, border:"3px solid #FFF9C4", borderRadius:20, padding:"8px 18px", fontSize:13, fontWeight:900, color:C.dark, fontFamily:"'Fredoka One',sans-serif", cursor:"pointer", boxShadow:`0 4px 0 #B86000` }}>IR!</button>
+
+        {/* Temas do reino */}
+        <div style={{ position:"absolute", bottom:"15%", right:"4%", zIndex:10 }}>
+          <div style={{ background:"rgba(0,0,0,0.75)", borderRadius:16, padding:"8px 12px", border:`2px solid ${regiao.corClaro}55`, maxWidth:130 }}>
+            <div style={{ fontSize:10, fontWeight:900, color:regiao.corClaro, fontFamily:"'Fredoka One',sans-serif", marginBottom:4 }}>📚 Temas</div>
+            {regiao.temas.map((t,i)=>(
+              <div key={i} style={{ fontSize:9, color:"rgba(255,255,255,0.85)", fontWeight:700, lineHeight:1.6 }}>• {t}</div>
+            ))}
+          </div>
+        </div>
+
+        {/* Missão do dia */}
+        <div style={{ position:"absolute", bottom:8, left:8, right:8, background:"linear-gradient(135deg,#4527A0,#6A1B9A)", borderRadius:18, padding:"10px 14px", border:"2px solid #CE93D8", display:"flex", alignItems:"center", gap:10, boxShadow:"0 6px 24px rgba(0,0,0,0.5)" }}>
+          <div style={{ fontSize:26, animation:"float 2s ease-in-out infinite" }}>⚡</div>
+          <div style={{ flex:1 }}>
+            <div style={{ fontSize:12, fontWeight:900, color:C.gold, fontFamily:"'Fredoka One',sans-serif" }}>OLÁ, {nomeAluno.toUpperCase()}!</div>
+            <div style={{ fontSize:10, color:"#E1BEE7", fontWeight:700 }}>Complete 5 desafios · Ganhe 200 moedas</div>
+          </div>
+          <button onClick={()=>go("quiz")} style={{ background:`linear-gradient(135deg,${C.gold},${C.goldDk})`, border:"2px solid #FFF9C4", borderRadius:16, padding:"6px 14px", fontSize:12, fontWeight:900, color:C.dark, fontFamily:"'Fredoka One',sans-serif", cursor:"pointer", boxShadow:`0 4px 0 #B86000` }}>IR!</button>
+        </div>
+      </div>
+
+      {/* SELETOR DE REGIÕES */}
+      <div style={{ background:"linear-gradient(180deg,#0A0F1E,#0D1B3E)", borderTop:`3px solid ${C.gold}`, padding:"8px 8px 4px", overflowX:"auto" }}>
+        <div style={{ display:"flex", gap:6, minWidth:"max-content", paddingBottom:4 }}>
+          {REGIOES.map((r,i)=>{
+            const ativo = regiaoAtiva === i;
+            const bloqueado = i > 0; // só 1º ano desbloqueado
+            return (
+              <button key={i} onClick={()=>{
+                if(bloqueado && i > 0){toast("🔒",`Complete o ${REGIOES[i-1].nome.split(".")[1].trim()} primeiro!`,"info");return;}
+                setRegiaoAtiva(i);
+              }} style={{
+                display:"flex", flexDirection:"column", alignItems:"center", gap:2,
+                padding:"6px 10px", borderRadius:14, border:`2px solid ${ativo ? r.corClaro : "rgba(255,255,255,0.15)"}`,
+                background: ativo ? r.bg : "rgba(255,255,255,0.05)",
+                cursor:"pointer", minWidth:70, transition:"all 0.2s",
+                opacity: bloqueado && !ativo ? 0.5 : 1,
+                boxShadow: ativo ? `0 4px 0 ${r.cor}, 0 0 16px ${r.corClaro}44` : "none",
+              }}>
+                <span style={{ fontSize:18 }}>{bloqueado && i > 0 ? "🔒" : r.emoji}</span>
+                <span style={{ fontSize:9, fontWeight:900, color: ativo ? "white" : "#90CAF9", fontFamily:"'Fredoka One',sans-serif", textAlign:"center", lineHeight:1.2 }}>
+                  {r.serie}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
 }
 
 
-
-const QM={ soma:{label:"Soma ➕",color:C.red,bg:"linear-gradient(180deg,#0A1628,#1a0808)"}, sub:{label:"Subtr. ➖",color:C.orange,bg:"linear-gradient(180deg,#0A1628,#1a0f00)"}, mult:{label:"Mult. ✖️",color:C.purple,bg:"linear-gradient(180deg,#0A1628,#0f0818)"}, divisao:{label:"Divisão ➗",color:C.blue,bg:"linear-gradient(180deg,#0A1628,#001020)"} };
+const QM={
+  soma:{label:"Soma ➕",color:C.red,bg:"linear-gradient(180deg,#0A1628,#1a0808)"},
+  sub:{label:"Subtr. ➖",color:C.orange,bg:"linear-gradient(180deg,#0A1628,#1a0f00)"},
+  mult:{label:"Mult. ✖️",color:C.purple,bg:"linear-gradient(180deg,#0A1628,#0f0818)"},
+  divisao:{label:"Divisão ➗",color:C.blue,bg:"linear-gradient(180deg,#0A1628,#001020)"}
+};
 function sh(a){return[...a].sort(()=>Math.random()-0.5);}
 function genQ(m){
   if(m==="soma"){const a=Math.floor(Math.random()*20)+1,b=Math.floor(Math.random()*20)+1,ans=a+b;return{q:`${a} + ${b}`,ans,opts:sh([ans,ans-2,ans+3,ans-1])};}
@@ -448,9 +629,8 @@ function genQ(m){
   if(m==="mult"){const a=Math.floor(Math.random()*9)+2,b=Math.floor(Math.random()*9)+2,ans=a*b;return{q:`${a} × ${b}`,ans,opts:sh([ans,ans-a,ans+b,ans+a])};}
   const b=Math.floor(Math.random()*9)+2,ans=Math.floor(Math.random()*9)+1,a=b*ans;return{q:`${a} ÷ ${b}`,ans,opts:sh([ans,ans+1,ans-1,ans+2])};
 }
-const OC=[C.red,C.green,C.purple,C.orange];
 const TOTAL=5;
-
+const OC=[C.red,C.green,C.purple,C.orange];
 function QuizScreen({ go, toast, showBurst }) {
   const [mode,setMode]=useState(null);const [qi,setQi]=useState(0);const [q,setQ]=useState(null);
   const [sel,setSel]=useState(null);const [done,setDone]=useState(false);
