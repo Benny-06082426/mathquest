@@ -176,7 +176,7 @@ function LoginScreen({ onDone }) {
 
   /* SPLASH */
   if (step === "splash") return (
-    <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", padding:"28px 24px 36px", background:"linear-gradient(180deg,#1565C0 0%,#0D47A1 50%,#0A2D6E 100%)", position:"relative", overflow:"hidden", gap:0 }}>
+    <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", padding:"20px 24px 28px", background:"linear-gradient(180deg,#1565C0 0%,#0D47A1 50%,#0A2D6E 100%)", position:"relative", overflow:"hidden", gap:0 }}>
       {/* Fundo estrelas */}
       <div style={{ position:"absolute", inset:0, pointerEvents:"none" }}>
         {[...Array(14)].map((_,i)=>(<div key={i} style={{ position:"absolute", left:`${[8,18,30,45,60,72,85,12,55,78,25,65,40,90][i]}%`, top:`${[10,25,8,18,6,28,14,40,35,50,55,45,60,20][i]}%`, width:i%3===0?3:2, height:i%3===0?3:2, borderRadius:"50%", background:"white", opacity:0.6, animation:`twinkle ${1.5+i*0.2}s ease-in-out infinite`, animationDelay:`${i*0.3}s` }}/>))}
@@ -202,28 +202,66 @@ function LoginScreen({ onDone }) {
   );
 
   /* WELCOME */
-  if (step === "welcome") return (
-    <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", padding:"32px 24px 28px", gap:16, background:"linear-gradient(180deg,#0D47A1,#0A1628)" }}>
-      <div style={{ animation:"heroFloat 2.5s ease-in-out infinite" }}><MaxHero sz={90}/></div>
-      <div style={{ fontSize:28, fontWeight:900, color:"white", fontFamily:"'Fredoka One',sans-serif", textAlign:"center" }}>Olá! Quem é você? 👋</div>
-      <div style={{ fontSize:13, color:"#90CAF9", fontWeight:600, textAlign:"center", lineHeight:1.6 }}>Escolha como quer entrar no MathQuest</div>
-      <div style={{ display:"flex", flexDirection:"column", gap:10, width:"100%", marginTop:4 }}>
-        {[{ label:"Sou Aluno", sub:"Entro com meu código de acesso", icon:"🎒", color:C.blue, shadow:"#003A99", step:"aluno_codigo" },
-          { label:"Sou Pai / Mãe", sub:"Cadastro e acompanho meus filhos", icon:"👨‍👩‍👧", color:C.gold, shadow:"#B86000", step:"pai_login" },
-          { label:"Sou Professor(a)", sub:"Gerencio minhas turmas", icon:"👩‍🏫", color:C.purple, shadow:"#4A00AA", step:"prof_login" }
-        ].map((item,i) => (
-          <button key={i} onClick={() => setStep(item.step)} style={{ display:"flex", alignItems:"center", gap:14, padding:"16px 18px", borderRadius:20, cursor:"pointer", background:`linear-gradient(135deg,${item.color}22,${item.color}11)`, border:`3px solid ${item.color}`, boxShadow:`0 5px 0 ${item.shadow}88`, transition:"all 0.15s" }}>
-            <div style={{ width:50, height:50, borderRadius:16, background:`linear-gradient(135deg,${item.color},${item.color}AA)`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:26, flexShrink:0 }}>{item.icon}</div>
-            <div style={{ textAlign:"left", flex:1 }}>
-              <div style={{ fontSize:16, fontWeight:900, color:"white", fontFamily:"'Fredoka One',sans-serif" }}>{item.label}</div>
-              <div style={{ fontSize:11, color:"#90CAF9", fontWeight:600, marginTop:2 }}>{item.sub}</div>
+  if (step === "welcome") {
+    const filhosSalvos = Storage.get("mq_filhos") || [];
+    return (
+      <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", padding:"20px 20px 20px", gap:12, background:"linear-gradient(180deg,#0D47A1,#0A1628)", overflowY:"auto" }}>
+        <div style={{ animation:"heroFloat 2s ease-in-out infinite" }}><MaxHero sz={72}/></div>
+        <div style={{ fontSize:24, fontWeight:900, color:"white", fontFamily:"'Fredoka One',sans-serif", textAlign:"center" }}>Quem vai jogar? 👋</div>
+
+        {/* Avatares de alunos cadastrados — acesso direto com 1 toque */}
+        {filhosSalvos.length > 0 && (
+          <div style={{ width:"100%", background:"rgba(255,255,255,0.07)", borderRadius:20, padding:"12px 14px", border:`2px solid ${C.blue}44` }}>
+            <div style={{ fontSize:11, fontWeight:800, color:"#90CAF9", textTransform:"uppercase", letterSpacing:1, marginBottom:10 }}>🎒 Toque no seu personagem!</div>
+            <div style={{ display:"flex", gap:10, flexWrap:"wrap", justifyContent:"center" }}>
+              {filhosSalvos.map((f,i) => (
+                <button key={i} onClick={() => {
+                  Storage.set("mq_usuario_atual", { tipo:"aluno", codigo:f.codigo, nome:f.nome, avatar:f.avatar, grade:f.grade });
+                  onDone("map");
+                }} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4, padding:"10px 12px", borderRadius:18, border:`3px solid ${C.blue}`, background:`linear-gradient(135deg,${C.blue}33,${C.blue}11)`, cursor:"pointer", minWidth:70, boxShadow:`0 5px 0 #003A99` }}>
+                  <div style={{ fontSize:36 }}>{AVATARS[f.avatar]}</div>
+                  <div style={{ fontSize:12, fontWeight:900, color:"white", fontFamily:"'Fredoka One',sans-serif" }}>{f.nome}</div>
+                  <div style={{ fontSize:9, color:"#90CAF9", fontWeight:700 }}>{GRADES[f.grade]}</div>
+                </button>
+              ))}
             </div>
-            <div style={{ fontSize:20, color:item.color }}>→</div>
-          </button>
-        ))}
+          </div>
+        )}
+
+        {/* Botões adultos */}
+        <div style={{ display:"flex", flexDirection:"column", gap:8, width:"100%" }}>
+          {filhosSalvos.length === 0 && (
+            <button onClick={() => setStep("aluno_codigo")} style={{ display:"flex", alignItems:"center", gap:12, padding:"14px 16px", borderRadius:18, cursor:"pointer", background:`linear-gradient(135deg,${C.blue}22,${C.blue}11)`, border:`3px solid ${C.blue}`, boxShadow:`0 5px 0 #003A9988` }}>
+              <div style={{ width:46, height:46, borderRadius:14, background:`linear-gradient(135deg,${C.blue},${C.blueDk})`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:24, flexShrink:0 }}>🎒</div>
+              <div style={{ textAlign:"left" }}>
+                <div style={{ fontSize:15, fontWeight:900, color:"white", fontFamily:"'Fredoka One',sans-serif" }}>Sou Aluno</div>
+                <div style={{ fontSize:10, color:"#90CAF9", fontWeight:600 }}>Tenho um código de acesso</div>
+              </div>
+              <div style={{ fontSize:18, color:C.blue, marginLeft:"auto" }}>→</div>
+            </button>
+          )}
+          {[
+            { label:"Sou Pai / Mãe", sub:"Acompanho meus filhos", icon:"👨‍👩‍👧", color:C.gold, shadow:"#B86000", step:"pai_login" },
+            { label:"Sou Professor(a)", sub:"Gerencio minhas turmas", icon:"👩‍🏫", color:C.purple, shadow:"#4A00AA", step:"prof_login" }
+          ].map((item,i) => (
+            <button key={i} onClick={() => setStep(item.step)} style={{ display:"flex", alignItems:"center", gap:12, padding:"14px 16px", borderRadius:18, cursor:"pointer", background:`linear-gradient(135deg,${item.color}22,${item.color}11)`, border:`3px solid ${item.color}`, boxShadow:`0 5px 0 ${item.shadow}88` }}>
+              <div style={{ width:46, height:46, borderRadius:14, background:`linear-gradient(135deg,${item.color},${item.color}AA)`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:24, flexShrink:0 }}>{item.icon}</div>
+              <div style={{ textAlign:"left" }}>
+                <div style={{ fontSize:15, fontWeight:900, color:"white", fontFamily:"'Fredoka One',sans-serif" }}>{item.label}</div>
+                <div style={{ fontSize:10, color:"#90CAF9", fontWeight:600 }}>{item.sub}</div>
+              </div>
+              <div style={{ fontSize:18, color:item.color, marginLeft:"auto" }}>→</div>
+            </button>
+          ))}
+          {filhosSalvos.length > 0 && (
+            <button onClick={() => setStep("aluno_codigo")} style={{ padding:"10px", borderRadius:14, border:`2px solid rgba(255,255,255,0.15)`, background:"transparent", color:"#90CAF9", fontSize:12, fontWeight:700, cursor:"pointer" }}>
+              + Entrar com outro código
+            </button>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
   /* ALUNO CÓDIGO */
   if (step === "aluno_codigo") return (
@@ -616,12 +654,33 @@ function MapScreen({ go, toast }) {
 }
 
 
+// Conteúdo do 1º Ano: Contagem, Números, Soma, Subtração com 3 níveis
 const QM={
-  soma:{label:"Soma ➕",color:C.red,bg:"linear-gradient(180deg,#0A1628,#1a0808)"},
-  sub:{label:"Subtr. ➖",color:C.orange,bg:"linear-gradient(180deg,#0A1628,#1a0f00)"},
-  mult:{label:"Mult. ✖️",color:C.purple,bg:"linear-gradient(180deg,#0A1628,#0f0818)"},
-  divisao:{label:"Divisão ➗",color:C.blue,bg:"linear-gradient(180deg,#0A1628,#001020)"}
+  contagem:{label:"Contagem 🔢",color:"#2ECC71",bg:"linear-gradient(180deg,#0A1628,#061a0a)"},
+  soma:    {label:"Soma ➕",    color:C.red,   bg:"linear-gradient(180deg,#0A1628,#1a0808)"},
+  sub:     {label:"Subtração ➖",color:C.orange,bg:"linear-gradient(180deg,#0A1628,#1a0f00)"},
+  numeros: {label:"Números 🔢", color:C.blue,  bg:"linear-gradient(180deg,#0A1628,#001020)"},
 };
+
+// Gera questão com nível de dificuldade
+function genQNivel(mode, nivel=1){
+  const max = nivel===1?10:nivel===2?20:50;
+  if(mode==="contagem"){
+    const a=Math.floor(Math.random()*max)+1;
+    const opts=[a];
+    while(opts.length<4){const r=a+Math.floor(Math.random()*6)-3;if(r>0&&!opts.includes(r))opts.push(r);}
+    return{q:`Conta os objetos: ${"⭐".repeat(Math.min(a,10))}${a>10?"... ("+a+")":""}`,ans:a,opts:opts.slice(0,4).sort(()=>Math.random()-0.5)};
+  }
+  if(mode==="numeros"){
+    const a=Math.floor(Math.random()*max)+1;
+    const anterior=a-1,posterior=a+1;
+    const tipo=Math.random()>0.5?"anterior":"posterior";
+    const ans=tipo==="anterior"?anterior:posterior;
+    const opts=[ans,ans+2,ans-2,ans+1].filter(v=>v>0);
+    return{q:tipo==="anterior"?`Qual vem ANTES de ${a}?`:`Qual vem DEPOIS de ${a}?`,ans,opts:opts.slice(0,4).sort(()=>Math.random()-0.5)};
+  }
+  return genQ(mode);
+}
 function sh(a){return[...a].sort(()=>Math.random()-0.5);}
 function genQ(m){
   if(m==="soma"){const a=Math.floor(Math.random()*20)+1,b=Math.floor(Math.random()*20)+1,ans=a+b;return{q:`${a} + ${b}`,ans,opts:sh([ans,ans-2,ans+3,ans-1])};}
@@ -635,32 +694,78 @@ function QuizScreen({ go, toast, showBurst }) {
   const [mode,setMode]=useState(null);const [qi,setQi]=useState(0);const [q,setQ]=useState(null);
   const [sel,setSel]=useState(null);const [done,setDone]=useState(false);
   const [hp,setHp]=useState(3);const [xp,setXp]=useState(0);const [end,setEnd]=useState(false);
+  const [acertos,setAcertos]=useState(0); // conta acertos da rodada
+  const ACERTOS_NECESSARIOS = 5; // precisa de 5 acertos para passar de fase
 
-  const start=(m)=>{setMode(m);setQ(genQ(m));setQi(0);setSel(null);setDone(false);setHp(3);setXp(0);setEnd(false);};
+  const [nivel,setNivel]=useState(1);
+  const start=(m,nv=1)=>{setMode(m);setNivel(nv);setQ(genQNivel(m,nv));setQi(0);setSel(null);setDone(false);setHp(3);setXp(0);setEnd(false);setAcertos(0);};
+
   const pick=(opt)=>{
-    if(sel!==null)return; setSel(opt); setDone(true);
+    if(sel!==null)return;
+    setSel(opt);setDone(true);
     if(opt===q.ans){
-      const nx=xp+100; setXp(nx); toast("⚡","+100 XP!","xp");
+      const nacc=acertos+1; setAcertos(nacc);
+      const nx=xp+100; setXp(nx); toast("⭐",`${nacc}/${ACERTOS_NECESSARIOS} acertos!`,"xp");
       if(nx%300===0){toast("🪙","+50 Moedas!","coin");showBurst();}
       const atual=Storage.get("mq_usuario_atual");
       if(atual?.codigo){const filhos=Storage.get("mq_filhos")||[];const idx=filhos.findIndex(f=>f.codigo===atual.codigo);if(idx>=0){filhos[idx].xp=(filhos[idx].xp||0)+100;filhos[idx].questoes=(filhos[idx].questoes||0)+1;filhos[idx].acertos=(filhos[idx].acertos||0)+1;Storage.set("mq_filhos",filhos);}}
+      // Avança automaticamente após 0.8s se acertou
+      setTimeout(()=>next(nacc),800);
     } else {
-      const nh=hp-1; setHp(nh); toast("❤️","Vida perdida!","info");
+      const nh=hp-1; setHp(nh); toast("❤️","Errou! Tenta de novo!","info");
       if(nh<=0)setTimeout(()=>setEnd(true),1200);
       const atual=Storage.get("mq_usuario_atual");
       if(atual?.codigo){const filhos=Storage.get("mq_filhos")||[];const idx=filhos.findIndex(f=>f.codigo===atual.codigo);if(idx>=0){filhos[idx].questoes=(filhos[idx].questoes||0)+1;Storage.set("mq_filhos",filhos);}}
+      // Avança para próxima questão após 1.2s mesmo errando
+      setTimeout(()=>next(acertos),1200);
     }
   };
-  const next=()=>{if(hp<=0||qi+1>=TOTAL){setEnd(true);return;}setQi(i=>i+1);setQ(genQ(mode));setSel(null);setDone(false);};
+
+  const next=(currentAcertos)=>{
+    const acc = currentAcertos !== undefined ? currentAcertos : acertos;
+    // Completou 5 acertos = passou de fase!
+    if(acc>=ACERTOS_NECESSARIOS){setEnd(true);return;}
+    // Acabou as vidas
+    if(hp<=0){setEnd(true);return;}
+    setQi(i=>i+1);setQ(genQNivel(mode,nivel));setSel(null);setDone(false);
+  };
 
   if(!mode)return(
-    <div style={{flex:1,display:"flex",flexDirection:"column",background:`linear-gradient(180deg,${C.blueBg},${C.dark})`,padding:"20px 16px",gap:12}}>
-      <div style={{fontSize:22,fontWeight:900,color:C.gold,fontFamily:"'Fredoka One',sans-serif",textAlign:"center",textShadow:`0 0 20px ${C.gold}66`}}>⚔️ Escolha o desafio</div>
-      <div style={{textAlign:"center",animation:"heroFloat 2s ease-in-out infinite"}}><MaxHero sz={90}/></div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,flex:1}}>
-        {Object.entries(QM).map(([k,v])=>(<button key={k} onClick={()=>start(k)} style={{borderRadius:22,padding:"20px 10px",border:`3px solid ${v.color}`,background:`linear-gradient(135deg,${v.color}33,${v.color}11)`,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:8,boxShadow:`0 6px 0 ${v.color}55`}}><div style={{fontSize:36}}>{v.label.split(" ")[1]}</div><div style={{fontSize:14,fontWeight:900,color:v.color,fontFamily:"'Fredoka One',sans-serif"}}>{v.label.split(" ")[0]}</div></button>))}
+    <div style={{flex:1,display:"flex",flexDirection:"column",background:`linear-gradient(180deg,${C.blueBg},${C.dark})`,overflowY:"auto"}}>
+      <div style={{padding:"16px 16px 8px",display:"flex",alignItems:"center",gap:10}}>
+        <button onClick={()=>go("map")} style={{background:"rgba(255,255,255,0.1)",border:"none",borderRadius:12,padding:"6px 12px",color:"white",fontSize:12,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",cursor:"pointer"}}>◀ Mapa</button>
+        <div style={{flex:1,fontSize:18,fontWeight:900,color:C.gold,fontFamily:"'Fredoka One',sans-serif",textAlign:"center"}}>⚔️ Escolha o desafio</div>
       </div>
-      <button onClick={()=>go("map")} style={{padding:"12px 0",borderRadius:20,border:`2px solid rgba(255,255,255,0.15)`,background:"transparent",color:"#90CAF9",fontSize:14,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",cursor:"pointer"}}>◀ Voltar ao Mapa</button>
+      <div style={{display:"flex",justifyContent:"center",animation:"heroFloat 1.5s ease-in-out infinite"}}><MaxHero sz={80}/></div>
+
+      {/* Nível de dificuldade */}
+      <div style={{padding:"8px 16px"}}>
+        <div style={{fontSize:11,fontWeight:800,color:"#90CAF9",textTransform:"uppercase",letterSpacing:1,marginBottom:8,textAlign:"center"}}>Nível de dificuldade</div>
+        <div style={{display:"flex",gap:6,justifyContent:"center"}}>
+          {[{n:1,l:"🌱 Básico",c:C.green},{n:2,l:"⚡ Médio",c:C.gold},{n:3,l:"🔥 Avançado",c:C.red}].map(nv=>(
+            <button key={nv.n} onClick={()=>setNivel(nv.n)} style={{flex:1,padding:"8px 4px",borderRadius:14,border:`2px solid ${nivel===nv.n?nv.c:"rgba(255,255,255,0.15)"}`,background:nivel===nv.n?`${nv.c}33`:"rgba(255,255,255,0.05)",color:nivel===nv.n?nv.c:"#90CAF9",fontSize:11,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",cursor:"pointer"}}>
+              {nv.l}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tópicos do 1º Ano */}
+      <div style={{padding:"8px 16px"}}>
+        <div style={{fontSize:11,fontWeight:800,color:"#90CAF9",textTransform:"uppercase",letterSpacing:1,marginBottom:8,textAlign:"center"}}>Tópico</div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+          {Object.entries(QM).map(([k,v])=>(
+            <button key={k} onClick={()=>start(k,nivel)} style={{borderRadius:20,padding:"16px 10px",border:`3px solid ${v.color}`,background:`linear-gradient(135deg,${v.color}33,${v.color}11)`,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:6,boxShadow:`0 5px 0 ${v.color}55`}}>
+              <div style={{fontSize:32}}>{v.label.split(" ")[1]||v.label.split(" ")[0]}</div>
+              <div style={{fontSize:12,fontWeight:900,color:v.color,fontFamily:"'Fredoka One',sans-serif",textAlign:"center"}}>{v.label.split(" ")[0]}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{padding:"0 16px 16px",fontSize:11,color:"rgba(255,255,255,0.4)",textAlign:"center",fontWeight:600}}>
+        Acerte {ACERTOS_NECESSARIOS} questões para completar a fase! ⭐
+      </div>
     </div>
   );
 
@@ -668,12 +773,13 @@ function QuizScreen({ go, toast, showBurst }) {
 
   if(end)return(
     <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:`linear-gradient(160deg,${C.blueBg},${C.dark})`,gap:14,padding:24}}>
-      <div style={{background:xp>=300?"linear-gradient(135deg,#FFD700,#FF8C00)":"linear-gradient(135deg,#37474F,#263238)",borderRadius:24,padding:"16px 32px",textAlign:"center",width:"100%",boxShadow:xp>=300?`0 8px 0 #B86000`:"0 8px 0 #1C2526"}}>
-        <div style={{fontSize:30,fontWeight:900,color:xp>=300?C.dark:"white",fontFamily:"'Fredoka One',sans-serif"}}>{xp>=300?"PARABÉNS! 🎉":"Continue tentando! 💪"}</div>
+      <div style={{background:acertos>=ACERTOS_NECESSARIOS?"linear-gradient(135deg,#FFD700,#FF8C00)":"linear-gradient(135deg,#37474F,#263238)",borderRadius:24,padding:"16px 32px",textAlign:"center",width:"100%",boxShadow:acertos>=ACERTOS_NECESSARIOS?`0 8px 0 #B86000`:"0 8px 0 #1C2526"}}>
+        <div style={{fontSize:28,fontWeight:900,color:acertos>=ACERTOS_NECESSARIOS?C.dark:"white",fontFamily:"'Fredoka One',sans-serif"}}>{acertos>=ACERTOS_NECESSARIOS?"FASE COMPLETA! 🎉":"Tente mais uma vez! 💪"}</div>
+        <div style={{fontSize:14,color:acertos>=ACERTOS_NECESSARIOS?C.dark+"aa":"rgba(255,255,255,0.7)",fontWeight:700,marginTop:4}}>{acertos}/{ACERTOS_NECESSARIOS} acertos</div>
       </div>
-      <div style={{animation:"heroFloat 1.5s ease-in-out infinite"}}><MaxHero sz={110} mood={xp>=300?"wow":"sad"}/></div>
-      <div style={{display:"flex",gap:6}}>{[1,2,3].map(s=>(<div key={s} style={{animation:s<=(xp>=400?3:xp>=200?2:1)?`popIn 0.4s ${s*0.15}s both`:"none"}}><Star on={s<=(xp>=400?3:xp>=200?2:1)} sz={52}/></div>))}</div>
-      <div style={{background:`${C.gold}18`,border:`3px solid ${C.gold}55`,borderRadius:20,padding:"12px 32px",fontSize:24,fontWeight:900,color:C.gold,fontFamily:"'Fredoka One',sans-serif"}}>⚡ {xp} XP</div>
+      <div style={{animation:"heroFloat 1.5s ease-in-out infinite"}}><MaxHero sz={110} mood={acertos>=ACERTOS_NECESSARIOS?"wow":"sad"}/></div>
+      <div style={{display:"flex",gap:6}}>{[1,2,3].map(s=>(<div key={s} style={{animation:s<=(acertos>=5?3:acertos>=3?2:acertos>=1?1:0)?`popIn 0.4s ${s*0.15}s both`:"none"}}><Star on={s<=(acertos>=5?3:acertos>=3?2:acertos>=1?1:0)} sz={52}/></div>))}</div>
+      <div style={{background:`${C.gold}18`,border:`3px solid ${C.gold}55`,borderRadius:20,padding:"12px 32px",fontSize:22,fontWeight:900,color:C.gold,fontFamily:"'Fredoka One',sans-serif"}}>⭐ {acertos} de {ACERTOS_NECESSARIOS} acertos</div>
       <div style={{display:"flex",gap:10,width:"100%"}}>
         <button onClick={()=>start(mode)} style={{flex:1,padding:14,borderRadius:20,border:"none",background:`linear-gradient(135deg,${C.blue},${C.blueDk})`,color:"white",fontSize:16,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",cursor:"pointer",boxShadow:`0 5px 0 #003A99`}}>🔄 De novo</button>
         <button onClick={()=>{setMode(null);go("map");}} style={{flex:1,padding:14,borderRadius:20,border:`3px solid ${C.gold}`,background:"transparent",color:C.gold,fontSize:16,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",cursor:"pointer"}}>🗺️ Mapa</button>
@@ -714,7 +820,7 @@ function QuizScreen({ go, toast, showBurst }) {
           </button>);
         })}
       </div>
-      {done&&<div style={{padding:"12px 14px 4px"}}><button onClick={next} style={{width:"100%",padding:16,borderRadius:22,border:"none",background:`linear-gradient(135deg,${C.gold},${C.goldDk})`,color:C.dark,fontSize:18,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",cursor:"pointer",boxShadow:`0 6px 0 #B86000`}}>CONTINUAR →</button></div>}
+      {done&&<div style={{padding:"8px 14px 2px",textAlign:"center"}}><div style={{fontSize:12,color:"rgba(255,255,255,0.5)",fontWeight:700,fontFamily:"'Fredoka One',sans-serif"}}>Avançando automaticamente... {acertos}/{ACERTOS_NECESSARIOS} acertos</div><div style={{height:4,background:"rgba(255,255,255,0.1)",borderRadius:4,margin:"6px 0",overflow:"hidden"}}><div style={{height:"100%",width:`${(acertos/ACERTOS_NECESSARIOS)*100}%`,background:C.green,borderRadius:4,transition:"width 0.3s"}}/></div></div>}
     </div>
   );
 }
