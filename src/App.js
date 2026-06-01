@@ -63,7 +63,7 @@ export function RewardBurst({ show: visible, onDone }) {
 
 
 
-export default function CodigoCard({ codigo, nome, grade, avatar }) {
+function CodigoCard({ codigo, nome, grade, avatar }) {
   const [copiado, setCopiado] = useState(false);
   const copiar = () => {
     try { navigator.clipboard.writeText(codigo); } catch {
@@ -106,7 +106,7 @@ export default function CodigoCard({ codigo, nome, grade, avatar }) {
 
 const inp = { padding:"14px 16px", borderRadius:16, border:"2px solid rgba(255,255,255,0.12)", background:"rgba(255,255,255,0.07)", fontSize:15, fontWeight:700, outline:"none", width:"100%", color:"white" };
 
-export default function LoginScreen({ onDone }) {
+function LoginScreen({ onDone }) {
   const [step, setStep]               = useState("splash");
   const [email, setEmail]             = useState("");
   const [pass, setPass]               = useState("");
@@ -348,7 +348,7 @@ const NODES=[
   {id:6,x:38,y:11,label:"%",      icon:"%", stars:0,state:"locked"},
 ];
 
-export default function MapScreen({ go, toast }) {
+function MapScreen({ go, toast }) {
   const usuario = Storage.get("mq_usuario_atual");
   const nomeAluno = usuario?.nome || "Herói";
   return (
@@ -424,7 +424,7 @@ function genQ(m){
 const OC=[C.red,C.green,C.purple,C.orange];
 const TOTAL=5;
 
-export default function QuizScreen({ go, toast, showBurst }) {
+function QuizScreen({ go, toast, showBurst }) {
   const [mode,setMode]=useState(null);const [qi,setQi]=useState(0);const [q,setQ]=useState(null);
   const [sel,setSel]=useState(null);const [done,setDone]=useState(false);
   const [hp,setHp]=useState(3);const [xp,setXp]=useState(0);const [end,setEnd]=useState(false);
@@ -516,7 +516,7 @@ export default function QuizScreen({ go, toast, showBurst }) {
 
 const SD={Personagens:[{n:"Max",e:"🦊",p:0,owned:true},{n:"Lia",e:"🧝‍♀️",p:500,owned:false},{n:"Draco",e:"🐲",p:300,owned:true},{n:"Nubi",e:"☁️",p:3,owned:false,gem:true}],Poderes:[{n:"Escudo",e:"🛡️",p:200,owned:false},{n:"Feitiço",e:"🪄",p:150,owned:true},{n:"Relâmp.",e:"⚡",p:2,owned:false,gem:true},{n:"Bomba",e:"💣",p:100,owned:false}],Moedas:[{n:"500 Moedas",e:"🪙",p:"R$1,99",real:true},{n:"1200 Moedas",e:"💰",p:"R$3,99",real:true},{n:"5 Gemas",e:"💎",p:"R$2,49",real:true},{n:"20 Gemas",e:"💎",p:"R$7,99",real:true}]};
 
-export default function ShopScreen({ toast }) {
+function ShopScreen({ toast }) {
   const [tab, setTab] = useState("Personagens");
   return (
     <div style={{ flex:1, display:"flex", flexDirection:"column", background:"linear-gradient(180deg,#1A0040,#2D0060)" }}>
@@ -558,7 +558,7 @@ export default function ShopScreen({ toast }) {
 
 const RD={global:[{pos:1,n:"Ana",xp:3250,av:"🧝‍♀️"},{pos:2,n:"Lucas",xp:2800,av:"🦊",me:true},{pos:3,n:"Pedro",xp:2450,av:"🧙"},{pos:4,n:"Sofia",xp:2100,av:"🐲"},{pos:5,n:"Miguel",xp:1900,av:"☁️"}],amigos:[{pos:1,n:"Lucas",xp:2800,av:"🦊",me:true},{pos:2,n:"Ana",xp:2600,av:"🧝‍♀️"},{pos:3,n:"Pedro",xp:1800,av:"🧙"}]};
 
-export default function RankScreen() {
+function RankScreen() {
   const [tab,setTab]=useState("global");
   const list=RD[tab];const top3=[list[1],list[0],list[2]].filter(Boolean);const rest=list.slice(3);
   const pC=["#C0C0C0","#FFD700","#CD7F32"];const pH=[88,112,72];const pM=["🥈","🥇","🥉"];
@@ -592,7 +592,7 @@ export default function RankScreen() {
 
 
 
-export default function HeroScreen() {
+function HeroScreen() {
   const usuario=Storage.get("mq_usuario_atual");
   const filhos=Storage.get("mq_filhos")||[];
   const filho=filhos.find(f=>f.codigo===usuario?.codigo);
@@ -638,7 +638,7 @@ export default function HeroScreen() {
 
 
 
-export default function ParentScreen({ go }) {
+function ParentScreen({ go }) {
   const usuario=Storage.get("mq_usuario_atual");
   const pais=Storage.get("mq_pais")||[];
   const pai=pais.find(p=>p.email===usuario?.email);
@@ -729,7 +729,7 @@ export default function ParentScreen({ go }) {
 
 
 
-export default function TeacherScreen({ go }) {
+function TeacherScreen({ go }) {
   const usuario=Storage.get("mq_usuario_atual");
   const profs=Storage.get("mq_professores")||[];
   const prof=profs.find(p=>p.email===usuario?.email)||{nome:usuario?.nome,escola:"",turmas:[]};
