@@ -405,8 +405,8 @@ function LoginScreen({ onDone }) {
 
 
 const NODES=[
-  {id:1,x:50,y:82,label:"Soma",   icon:"➕",stars:3,state:"done"},
-  {id:2,x:72,y:67,label:"Subtr.", icon:"➖",stars:2,state:"done"},
+  {id:1,x:50,y:82,label:"Soma",   icon:"➕",stars:0,state:"done"},
+  {id:2,x:72,y:67,label:"Subtr.", icon:"➖",stars:0,state:"done"},
   {id:3,x:52,y:52,label:"Mult.",  icon:"✖️",stars:0,state:"current"},
   {id:4,x:28,y:38,label:"Divisão",icon:"➗",stars:0,state:"locked"},
   {id:5,x:60,y:24,label:"Frações",icon:"½", stars:0,state:"locked"},
@@ -418,15 +418,23 @@ function MapScreen({ go, toast }) {
   const nomeAluno = usuario?.nome || "Herói";
   const [regiaoAtiva, setRegiaoAtiva] = useState(0);
 
+  // Progresso real do aluno
+  const filhosLista = Storage.get("mq_filhos") || [];
+  const alunoAtual = filhosLista.find(f => f.codigo === usuario?.codigo);
+  const fasesCompletas = alunoAtual?.fasesCompletas || 0;
+
   const REGIOES = [
     {
       id:0, nome:"1. Reino dos Números", serie:"1º Ano", cor:"#2E7D32", corClaro:"#4CAF50",
       bg:"linear-gradient(135deg,#1B5E20,#2E7D32)", emoji:"🏰",
       temas:["Contagem","Números","Soma","Subtração"],
-      fases:[
-        {n:1,stars:3,done:true},{n:2,stars:3,done:true},{n:3,stars:2,done:true},
-        {n:4,stars:1,done:true},{n:5,stars:0,current:true}
-      ]
+      fases:[1,2,3,4,5].map(n=>({
+        n,
+        stars: n <= fasesCompletas ? 3 : 0,
+        done: n < fasesCompletas,
+        current: n === Math.min(fasesCompletas+1, 5),
+        locked: n > fasesCompletas+1,
+      }))
     },
     {
       id:1, nome:"2. Floresta da Multiplicação", serie:"2º Ano", cor:"#1565C0", corClaro:"#42A5F5",
@@ -529,7 +537,7 @@ function MapScreen({ go, toast }) {
         </div>
 
         {/* FASES — layout em zigue-zague */}
-        <div style={{ position:"absolute", top:"36%", left:0, right:0, bottom:"14%", overflow:"hidden" }}>
+        <div style={{ position:"absolute", top:"32%", left:0, right:0, bottom:"8%", overflow:"hidden" }}>
           {/* Caminho pontilhado SVG */}
           <svg style={{ position:"absolute", inset:0, width:"100%", height:"100%", pointerEvents:"none" }} preserveAspectRatio="none">
             <path
@@ -540,7 +548,7 @@ function MapScreen({ go, toast }) {
 
           {/* Fases posicionadas */}
           {[
-            [14,80],[32,68],[50,76],[68,62],[85,72],
+            [12,85],[30,65],[52,80],[70,60],[88,75],
           ].map(([x,y],i)=>{
             const fase = regiao.fases[i];
             if(!fase) return null;
@@ -764,6 +772,11 @@ function QuizScreen({ go, toast, showBurst }) {
       if(nx%300===0){toast("🪙","+50 Moedas!","coin");showBurst();}
       const atual=Storage.get("mq_usuario_atual");
       if(atual?.codigo){const filhos=Storage.get("mq_filhos")||[];const idx=filhos.findIndex(f=>f.codigo===atual.codigo);if(idx>=0){filhos[idx].xp=(filhos[idx].xp||0)+100;filhos[idx].questoes=(filhos[idx].questoes||0)+1;filhos[idx].acertos=(filhos[idx].acertos||0)+1;Storage.set("mq_filhos",filhos);}}
+      // Verifica se completou a fase (5 acertos)
+      if(nacc>=ACERTOS_NECESSARIOS){
+        const atual2=Storage.get("mq_usuario_atual");
+        if(atual2?.codigo){const filhos2=Storage.get("mq_filhos")||[];const idx2=filhos2.findIndex(f=>f.codigo===atual2.codigo);if(idx2>=0){filhos2[idx2].fasesCompletas=(filhos2[idx2].fasesCompletas||0)+1;Storage.set("mq_filhos",filhos2);}}
+      }
       // Avança automaticamente após 0.8s se acertou
       setTimeout(()=>next(nacc),800);
     } else {
