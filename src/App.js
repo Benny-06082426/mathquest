@@ -176,7 +176,7 @@ function LoginScreen({ onDone }) {
 
   /* SPLASH */
   if (step === "splash") return (
-    <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", padding:"20px 24px 28px", background:"linear-gradient(180deg,#1565C0 0%,#0D47A1 50%,#0A2D6E 100%)", position:"relative", overflow:"hidden", gap:0 }}>
+    <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", padding:"16px 20px 20px", background:"linear-gradient(180deg,#1565C0 0%,#0D47A1 50%,#0A2D6E 100%)", position:"relative", overflow:"hidden" }}>
       {/* Fundo estrelas */}
       <div style={{ position:"absolute", inset:0, pointerEvents:"none" }}>
         {[...Array(14)].map((_,i)=>(<div key={i} style={{ position:"absolute", left:`${[8,18,30,45,60,72,85,12,55,78,25,65,40,90][i]}%`, top:`${[10,25,8,18,6,28,14,40,35,50,55,45,60,20][i]}%`, width:i%3===0?3:2, height:i%3===0?3:2, borderRadius:"50%", background:"white", opacity:0.6, animation:`twinkle ${1.5+i*0.2}s ease-in-out infinite`, animationDelay:`${i*0.3}s` }}/>))}
@@ -1284,9 +1284,9 @@ export default function App() {
   const isGame = !["login","parent","teacher"].includes(screen);
 
   return (
-    <div style={{ minHeight:"100vh", background:"#020814", display:"flex", alignItems:"center", justifyContent:"center", padding:"20px 0" }}>
+    <div style={{ minHeight:"100dvh", background:"#020814", display:"flex", alignItems:"center", justifyContent:"center" }}>
       <style>{CSS}</style>
-      <div style={{ width:390, height:844, borderRadius:50, overflow:"hidden", display:"flex", flexDirection:"column", boxShadow:`0 40px 100px #000000CC, 0 0 0 3px ${C.gold}44`, position:"relative" }}>
+      <div style={{ width:"100%", maxWidth:480, height:"100dvh", borderRadius:0, overflow:"hidden", display:"flex", flexDirection:"column", position:"relative" }}>
         <RewardBurst show={burst} onDone={() => setBurst(false)}/>
         <Toast toasts={toasts}/>
 
