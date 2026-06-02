@@ -661,29 +661,79 @@ const QM={
   numeros: {label:"Números 🔢", color:C.blue,  bg:"linear-gradient(180deg,#0A1628,#001020)"},
 };
 
-// Gera questão com nível de dificuldade
+// ═══════════════════════════════════════════
+// QUESTÕES 100% VISUAIS — sem texto longo
+// Tipos: contagem, numeros, soma, sub
+// nivel: 1=básico, 2=médio, 3=avançado
+// ═══════════════════════════════════════════
+const EMOJIS_CONTAGEM=["🍎","🐶","🦋","🎈","🍭","⭐","🐸","🌸","🍊","🎀"];
+
 function genQNivel(mode, nivel=1){
-  const max = nivel===1?10:nivel===2?20:50;
+  const max = nivel===1?5:nivel===2?10:20;
+
+  // ── CONTAGEM: mostra emojis, responde com número ──
   if(mode==="contagem"){
-    const a=Math.floor(Math.random()*max)+1;
+    const a = Math.max(1, Math.floor(Math.random()*max)+1);
+    const em = EMOJIS_CONTAGEM[Math.floor(Math.random()*EMOJIS_CONTAGEM.length)];
     const opts=[a];
-    while(opts.length<4){const r=a+Math.floor(Math.random()*6)-3;if(r>0&&!opts.includes(r))opts.push(r);}
-    const emojis=["🍎","🌟","🐶","🦋","🎈","🍭","🌈","🐸"];
-    const em=emojis[Math.floor(Math.random()*emojis.length)];
-    const exibir=Math.min(a,8);
-    const linha1=em.repeat(Math.min(exibir,4));
-    const linha2=exibir>4?em.repeat(exibir-4):"";
-    const mais=a>8?` +${a-8} mais`:"";
-    const qText=linha1+(linha2?"\n"+linha2:"")+(mais?"  "+mais:"")+"\n= ?";return{q:qText,ans:a,opts:opts.slice(0,4).sort(()=>Math.random()-0.5)};
+    while(opts.length<4){
+      const r=a+Math.floor(Math.random()*4)-(a>2?2:0);
+      if(r>0&&r!==a&&!opts.includes(r))opts.push(r);
+    }
+    // q.visual = array de emojis para renderizar
+    return{
+      tipo:"contagem",
+      emojis: Array(a).fill(em),
+      q:`Quantos ${em} você vê?`,
+      ans:a,
+      opts:opts.slice(0,4).sort(()=>Math.random()-0.5)
+    };
   }
+
+  // ── NÚMEROS: identifica o numeral visualmente ──
   if(mode==="numeros"){
-    const a=Math.floor(Math.random()*max)+1;
-    const anterior=a-1,posterior=a+1;
-    const tipo=Math.random()>0.5?"anterior":"posterior";
-    const ans=tipo==="anterior"?anterior:posterior;
-    const opts=[ans,ans+2,ans-2,ans+1].filter(v=>v>0);
-    return{q:tipo==="anterior"?`Qual vem ANTES de ${a}?`:`Qual vem DEPOIS de ${a}?`,ans,opts:opts.slice(0,4).sort(()=>Math.random()-0.5)};
+    const tipos=["sequencia","maior","menor","igual"];
+    const t=tipos[Math.floor(Math.random()*tipos.length)];
+    const a=Math.max(1,Math.floor(Math.random()*max)+1);
+
+    if(t==="sequencia"){
+      // Qual número vem depois?
+      const ans=a+1;
+      const opts=sh([ans,ans+1,ans-1,ans+2]).slice(0,4);
+      return{tipo:"numeros_seq",q:`${a} → ?`,qVisual:[a,"→","?"],ans,opts};
+    }
+    if(t==="maior"){
+      // Qual é o maior?
+      const nums=[a,a+2,a-1,a+1].filter(n=>n>0);
+      const ans=Math.max(...nums);
+      return{tipo:"numeros_maior",q:"🔼 Maior",qVisual:["🔼","Qual é o maior?"],ans,opts:sh(nums).slice(0,4)};
+    }
+    // Identifica o numeral
+    const ans=a;
+    const opts=sh([a,a+1,a-1>0?a-1:a+2,a+2]).slice(0,4);
+    return{tipo:"numeros",q:`${a}`,qVisual:["🔢",a],ans,opts};
   }
+
+  // ── SOMA: visual com emojis ──
+  if(mode==="soma"){
+    const a=Math.max(1,Math.floor(Math.random()*max)+1);
+    const b=Math.max(1,Math.floor(Math.random()*(max-a+1))+1);
+    const ans=a+b;
+    const em=EMOJIS_CONTAGEM[Math.floor(Math.random()*EMOJIS_CONTAGEM.length)];
+    const opts=sh([ans,ans+1,ans-1,ans+2]).filter(n=>n>0).slice(0,4);
+    return{tipo:"soma",emojisA:Array(a).fill(em),emojisB:Array(b).fill(em),q:`${a} + ${b}`,ans,opts};
+  }
+
+  // ── SUBTRAÇÃO: visual com emojis riscados ──
+  if(mode==="sub"){
+    const a=Math.max(2,Math.floor(Math.random()*max)+2);
+    const b=Math.max(1,Math.floor(Math.random()*(a-1))+1);
+    const ans=a-b;
+    const em=EMOJIS_CONTAGEM[Math.floor(Math.random()*EMOJIS_CONTAGEM.length)];
+    const opts=sh([ans,ans+1,ans-1>0?ans-1:ans+2,ans+2]).filter(n=>n>=0).slice(0,4);
+    return{tipo:"sub",emojisTotal:Array(a).fill(em),retirar:b,q:`${a} - ${b}`,ans,opts};
+  }
+
   return genQ(mode);
 }
 function sh(a){return[...a].sort(()=>Math.random()-0.5);}
@@ -802,26 +852,106 @@ function QuizScreen({ go, toast, showBurst }) {
 
   return(
     <div style={{flex:1,display:"flex",flexDirection:"column",background:m.bg}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 14px"}}>
-        <button onClick={()=>setMode(null)} style={{background:`${m.color}22`,border:`2px solid ${m.color}66`,borderRadius:14,padding:"6px 14px",fontSize:12,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",cursor:"pointer"}}>◀ Sair</button>
-        <div style={{fontSize:15,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>{qi+1}/{TOTAL}</div>
-        <div style={{display:"flex",gap:3}}>{[1,2,3].map(i=><span key={i} style={{fontSize:22,filter:i>hp?"grayscale(1) opacity(0.3)":"none",transition:"filter 0.3s"}}>❤️</span>)}</div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 12px"}}>
+        <button onClick={()=>setMode(null)} style={{background:`${m.color}22`,border:`2px solid ${m.color}66`,borderRadius:12,padding:"5px 10px",fontSize:11,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",cursor:"pointer"}}>◀</button>
+        <div style={{fontSize:12,fontWeight:900,color:"rgba(255,255,255,0.7)",fontFamily:"'Fredoka One',sans-serif"}}>{QM[mode]?.label}</div>
+        <div style={{display:"flex",gap:2}}>{[1,2,3].map(i=><span key={i} style={{fontSize:20,filter:i>hp?"grayscale(1) opacity(0.25)":"none",transition:"filter 0.3s"}}>❤️</span>)}</div>
       </div>
-      <div style={{height:10,background:"rgba(0,0,0,0.3)",margin:"0 14px 10px",borderRadius:10,overflow:"hidden",border:`1px solid ${m.color}44`}}>
-        <div style={{height:"100%",width:`${(qi/TOTAL)*100}%`,background:`linear-gradient(90deg,${C.gold},${C.orange})`,borderRadius:10,transition:"width 0.5s",boxShadow:`0 0 8px ${C.gold}88`}}/>
+      <div style={{padding:"0 14px 6px",display:"flex",alignItems:"center",gap:6}}>
+        <div style={{flex:1,height:8,background:"rgba(0,0,0,0.3)",borderRadius:8,overflow:"hidden",border:`1px solid ${m.color}44`}}>
+          <div style={{height:"100%",width:`${(acertos/ACERTOS_NECESSARIOS)*100}%`,background:`linear-gradient(90deg,${C.green},#1B8A3A)`,borderRadius:8,transition:"width 0.4s"}}/>
+        </div>
+        <span style={{fontSize:11,fontWeight:900,color:C.green,fontFamily:"'Fredoka One',sans-serif",flexShrink:0}}>⭐{acertos}/{ACERTOS_NECESSARIOS}</span>
       </div>
-      <div style={{display:"flex",alignItems:"flex-end",padding:"0 14px 6px",gap:4}}>
-        <div style={{animation:"float 2.5s ease-in-out infinite",flexShrink:0}}><MaxHero sz={72}/></div>
-        <div style={{background:"white",borderRadius:20,padding:"11px 14px",marginLeft:6,flex:1,position:"relative",boxShadow:"0 6px 20px rgba(0,0,0,0.3)"}}>
-          <div style={{position:"absolute",left:-10,bottom:14,width:0,height:0,borderTop:"10px solid transparent",borderBottom:"10px solid transparent",borderRight:"11px solid white"}}/>
-          <div style={{fontSize:14,fontWeight:900,color:C.dark,fontFamily:"'Fredoka One',sans-serif"}}>Qual é o resultado?</div>
+      <div style={{display:"flex",alignItems:"center",padding:"2px 12px 4px",gap:8}}>
+        <div style={{animation:"float 2s ease-in-out infinite",flexShrink:0}}><MaxHero sz={52}/></div>
+        <div style={{background:"white",borderRadius:16,padding:"6px 12px",position:"relative",boxShadow:"0 4px 12px rgba(0,0,0,0.25)",display:"flex",alignItems:"center",gap:6}}>
+          <div style={{position:"absolute",left:-8,top:"50%",transform:"translateY(-50%)",width:0,height:0,borderTop:"7px solid transparent",borderBottom:"7px solid transparent",borderRight:"9px solid white"}}/>
+          {/* Ícone visual do tipo de questão sem texto longo */}
+          {q.tipo==="contagem"&&<><span style={{fontSize:20}}>🔢</span><span style={{fontSize:13,fontWeight:900,color:C.dark,fontFamily:"'Fredoka One',sans-serif"}}>Quantos?</span></>}
+          {q.tipo==="soma"&&<><span style={{fontSize:20}}>➕</span><span style={{fontSize:13,fontWeight:900,color:C.dark,fontFamily:"'Fredoka One',sans-serif"}}>Soma!</span></>}
+          {q.tipo==="sub"&&<><span style={{fontSize:20}}>➖</span><span style={{fontSize:13,fontWeight:900,color:C.dark,fontFamily:"'Fredoka One',sans-serif"}}>Subtrai!</span></>}
+          {(q.tipo==="numeros"||q.tipo==="numeros_seq"||q.tipo==="numeros_maior")&&<><span style={{fontSize:20}}>🔢</span><span style={{fontSize:13,fontWeight:900,color:C.dark,fontFamily:"'Fredoka One',sans-serif"}}>Qual número?</span></>}
+          {!q.tipo&&<><span style={{fontSize:20}}>🧮</span><span style={{fontSize:13,fontWeight:900,color:C.dark,fontFamily:"'Fredoka One',sans-serif"}}>Resultado?</span></>}
+        </div>
+        {/* Barra de progresso acertos */}
+        <div style={{flex:1,display:"flex",gap:4,justifyContent:"flex-end"}}>
+          {Array(ACERTOS_NECESSARIOS).fill(0).map((_,i)=>(
+            <div key={i} style={{width:10,height:10,borderRadius:"50%",background:i<acertos?C.green:"rgba(255,255,255,0.2)",border:"1px solid rgba(255,255,255,0.3)",transition:"background 0.3s"}}/>
+          ))}
         </div>
       </div>
-      <div style={{margin:"8px 14px",borderRadius:24,padding:"20px 14px",background:"linear-gradient(135deg,rgba(0,0,0,0.4),rgba(0,0,0,0.2))",border:`3px solid ${m.color}`,textAlign:"center",boxShadow:`0 0 32px ${m.color}33`}}>
-        <div style={{fontSize:mode==="contagem"?28:46,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",letterSpacing:mode==="contagem"?2:4,textShadow:"0 3px 12px rgba(0,0,0,0.5)",whiteSpace:"pre-line",lineHeight:1.3}}>
-          {q.q.replace(" = ?","")}<br/><span style={{color:done?(sel===q.ans?C.green:C.red):C.gold,transition:"color 0.3s",fontSize:mode==="contagem"?36:46}}>= {done?sel:"?"}</span>
-        </div>
-        {done&&<div style={{marginTop:8,fontSize:18,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",color:sel===q.ans?C.green:C.red,animation:"popIn 0.35s ease both"}}>{sel===q.ans?"🎉 CORRETO! +100 XP":`😅 Era ${q.ans}!`}</div>}
+      <div style={{margin:"6px 12px",borderRadius:22,padding:"12px 10px",background:"linear-gradient(135deg,rgba(0,0,0,0.5),rgba(0,0,0,0.3))",border:`3px solid ${m.color}`,textAlign:"center",boxShadow:`0 0 28px ${m.color}33`,minHeight:100}}>
+
+        {/* CONTAGEM — mostra emojis em grade */}
+        {q.tipo==="contagem" && (
+          <div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:4,justifyContent:"center",maxWidth:260,margin:"0 auto 8px"}}>
+              {q.emojis.map((em,i)=>(
+                <span key={i} style={{fontSize:q.emojis.length<=5?40:q.emojis.length<=10?32:24,lineHeight:1,filter:done&&sel!==q.ans&&i>=q.ans?"grayscale(1) opacity(0.3)":"none"}}>{em}</span>
+              ))}
+            </div>
+            <div style={{fontSize:16,fontWeight:900,color:"rgba(255,255,255,0.7)",fontFamily:"'Fredoka One',sans-serif"}}>
+              = <span style={{fontSize:36,color:done?(sel===q.ans?C.green:C.red):C.gold}}>{done?sel:"?"}</span>
+            </div>
+          </div>
+        )}
+
+        {/* SOMA — duas colunas de emojis + sinal */}
+        {q.tipo==="soma" && (
+          <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,flexWrap:"wrap"}}>
+            <div style={{display:"flex",flexWrap:"wrap",gap:3,maxWidth:100,justifyContent:"center"}}>
+              {q.emojisA.map((em,i)=><span key={i} style={{fontSize:q.emojisA.length<=3?36:28}}>{em}</span>)}
+            </div>
+            <span style={{fontSize:36,fontWeight:900,color:C.orange}}>+</span>
+            <div style={{display:"flex",flexWrap:"wrap",gap:3,maxWidth:100,justifyContent:"center"}}>
+              {q.emojisB.map((em,i)=><span key={i} style={{fontSize:q.emojisB.length<=3?36:28}}>{em}</span>)}
+            </div>
+            <span style={{fontSize:32,fontWeight:900,color:"white"}}>=</span>
+            <span style={{fontSize:40,fontWeight:900,color:done?(sel===q.ans?C.green:C.red):C.gold}}>{done?sel:"?"}</span>
+          </div>
+        )}
+
+        {/* SUBTRAÇÃO — emojis com os retirados acinzentados */}
+        {q.tipo==="sub" && (
+          <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,flexWrap:"wrap"}}>
+            <div style={{display:"flex",flexWrap:"wrap",gap:3,maxWidth:160,justifyContent:"center"}}>
+              {q.emojisTotal.map((em,i)=>(
+                <span key={i} style={{fontSize:q.emojisTotal.length<=4?36:28,filter:i>=(q.emojisTotal.length-q.retirar)?"grayscale(1) opacity(0.35)":"none",textDecoration:i>=(q.emojisTotal.length-q.retirar)?"line-through":"none"}}>
+                  {em}
+                </span>
+              ))}
+            </div>
+            <span style={{fontSize:32,fontWeight:900,color:"white"}}>=</span>
+            <span style={{fontSize:40,fontWeight:900,color:done?(sel===q.ans?C.green:C.red):C.gold}}>{done?sel:"?"}</span>
+          </div>
+        )}
+
+        {/* NÚMEROS — identifica/sequência visual */}
+        {(q.tipo==="numeros"||q.tipo==="numeros_seq"||q.tipo==="numeros_maior") && (
+          <div>
+            <div style={{fontSize:q.tipo==="numeros_seq"?32:52,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",letterSpacing:4,marginBottom:6}}>
+              {q.q}
+            </div>
+            <div style={{fontSize:16,color:"rgba(255,255,255,0.6)",fontWeight:700}}>
+              = <span style={{fontSize:36,color:done?(sel===q.ans?C.green:C.red):C.gold}}>{done?sel:"?"}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Fallback para outros modos */}
+        {!q.tipo && (
+          <div style={{fontSize:44,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",letterSpacing:4}}>
+            {q.q} = <span style={{color:done?(sel===q.ans?C.green:C.red):C.gold}}>{done?sel:"?"}</span>
+          </div>
+        )}
+
+        {/* Feedback visual */}
+        {done && (
+          <div style={{marginTop:6,fontSize:22,animation:"popIn 0.35s ease both"}}>
+            {sel===q.ans?"🎉":"😅"}
+          </div>
+        )}
       </div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,padding:"0 14px"}}>
         {q.opts.map((opt,i)=>{
@@ -833,7 +963,7 @@ function QuizScreen({ go, toast, showBurst }) {
           </button>);
         })}
       </div>
-      {done&&<div style={{padding:"8px 14px 2px",textAlign:"center"}}><div style={{fontSize:12,color:"rgba(255,255,255,0.5)",fontWeight:700,fontFamily:"'Fredoka One',sans-serif"}}>Avançando automaticamente... {acertos}/{ACERTOS_NECESSARIOS} acertos</div><div style={{height:4,background:"rgba(255,255,255,0.1)",borderRadius:4,margin:"6px 0",overflow:"hidden"}}><div style={{height:"100%",width:`${(acertos/ACERTOS_NECESSARIOS)*100}%`,background:C.green,borderRadius:4,transition:"width 0.3s"}}/></div></div>}
+
     </div>
   );
 }
