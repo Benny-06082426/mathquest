@@ -430,8 +430,8 @@ function MapScreen({ go, toast }) {
       temas:["Contagem","Números","Soma","Subtração"],
       fases:[1,2,3,4,5].map(n=>({
         n,
-        stars: n <= fasesCompletas ? 3 : 0,
-        done: n < fasesCompletas,
+        stars: (alunoAtual?.starsMap||{})[n] || 0,
+        done: n < fasesCompletas+1,
         current: n === Math.min(fasesCompletas+1, 5),
         locked: n > fasesCompletas+1,
       }))
@@ -772,10 +772,22 @@ function QuizScreen({ go, toast, showBurst }) {
       if(nx%300===0){toast("🪙","+50 Moedas!","coin");showBurst();}
       const atual=Storage.get("mq_usuario_atual");
       if(atual?.codigo){const filhos=Storage.get("mq_filhos")||[];const idx=filhos.findIndex(f=>f.codigo===atual.codigo);if(idx>=0){filhos[idx].xp=(filhos[idx].xp||0)+100;filhos[idx].questoes=(filhos[idx].questoes||0)+1;filhos[idx].acertos=(filhos[idx].acertos||0)+1;Storage.set("mq_filhos",filhos);}}
-      // Verifica se completou a fase (5 acertos)
+      // Verifica se completou a fase (5 acertos) - salva progresso
       if(nacc>=ACERTOS_NECESSARIOS){
         const atual2=Storage.get("mq_usuario_atual");
-        if(atual2?.codigo){const filhos2=Storage.get("mq_filhos")||[];const idx2=filhos2.findIndex(f=>f.codigo===atual2.codigo);if(idx2>=0){filhos2[idx2].fasesCompletas=(filhos2[idx2].fasesCompletas||0)+1;Storage.set("mq_filhos",filhos2);}}
+        if(atual2?.codigo){
+          const filhos2=Storage.get("mq_filhos")||[];
+          const idx2=filhos2.findIndex(f=>f.codigo===atual2.codigo);
+          if(idx2>=0){
+            const fc=filhos2[idx2].fasesCompletas||0;
+            filhos2[idx2].fasesCompletas=fc+1;
+            // Salva estrelas por fase
+            const stars=filhos2[idx2].starsMap||{};
+            stars[fc+1]=3; // 3 estrelas por completar com 5 acertos
+            filhos2[idx2].starsMap=stars;
+            Storage.set("mq_filhos",filhos2);
+          }
+        }
       }
       // Avança automaticamente após 0.8s se acertou
       setTimeout(()=>next(nacc),800);
@@ -849,12 +861,19 @@ function QuizScreen({ go, toast, showBurst }) {
       <div style={{display:"flex",gap:6}}>{[1,2,3].map(s=>(<div key={s} style={{animation:s<=(acertos>=5?3:acertos>=3?2:acertos>=1?1:0)?`popIn 0.4s ${s*0.15}s both`:"none"}}><Star on={s<=(acertos>=5?3:acertos>=3?2:acertos>=1?1:0)} sz={52}/></div>))}</div>
       <div style={{background:`${C.gold}18`,border:`3px solid ${C.gold}55`,borderRadius:20,padding:"12px 32px",fontSize:22,fontWeight:900,color:C.gold,fontFamily:"'Fredoka One',sans-serif"}}>⭐ {acertos} de {ACERTOS_NECESSARIOS} acertos</div>
       {acertos>=ACERTOS_NECESSARIOS ? (
-        <button onClick={()=>start(mode, nivel)} style={{width:"100%",padding:16,borderRadius:22,border:"none",
-          background:`linear-gradient(135deg,${C.green},#1B8A3A)`,color:"white",fontSize:18,fontWeight:900,
-          fontFamily:"'Fredoka One',sans-serif",cursor:"pointer",boxShadow:`0 6px 0 #145A20`,
-          animation:"bounce 0.6s ease-in-out"}}>
-          🚀 PRÓXIMA FASE →
-        </button>
+        <div style={{display:"flex",flexDirection:"column",gap:8,width:"100%"}}>
+          <button onClick={()=>{setMode(null);setAcertos(0);setEnd(false);go("map");}} style={{width:"100%",padding:16,borderRadius:22,border:"none",
+            background:`linear-gradient(135deg,${C.green},#1B8A3A)`,color:"white",fontSize:18,fontWeight:900,
+            fontFamily:"'Fredoka One',sans-serif",cursor:"pointer",boxShadow:`0 6px 0 #145A20`,
+            animation:"bounce 0.6s ease-in-out"}}>
+            🗺️ VER MEU PROGRESSO!
+          </button>
+          <button onClick={()=>start(mode, nivel)} style={{width:"100%",padding:13,borderRadius:18,border:`2px solid ${C.blue}`,
+            background:"transparent",color:C.blue,fontSize:15,fontWeight:900,
+            fontFamily:"'Fredoka One',sans-serif",cursor:"pointer"}}>
+            🔄 Jogar de novo
+          </button>
+        </div>
       ) : null}
       <div style={{display:"flex",gap:10,width:"100%"}}>
         <button onClick={()=>start(mode,nivel)} style={{flex:1,padding:12,borderRadius:20,border:"none",background:`linear-gradient(135deg,${C.blue},${C.blueDk})`,color:"white",fontSize:14,fontWeight:900,fontFamily:"'Fredoka One',sans-serif",cursor:"pointer",boxShadow:`0 5px 0 #003A99`}}>🔄 De novo</button>
