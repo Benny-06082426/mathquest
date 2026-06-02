@@ -770,6 +770,10 @@ function QuizScreen({ go, toast, showBurst }) {
       const nacc=acertos+1; setAcertos(nacc);
       const nx=xp+100; setXp(nx); toast("⭐",`${nacc}/${ACERTOS_NECESSARIOS} acertos!`,"xp");
       if(nx%300===0){toast("🪙","+50 Moedas!","coin");showBurst();}
+      // Level up check
+      const novoNivel=Math.floor(nx/500)+1;
+      const nivelAnterior=Math.floor((nx-100)/500)+1;
+      if(novoNivel>nivelAnterior){toast("🆙",`NÍVEL ${novoNivel}! 🎉`,"level");showBurst();}
       const atual=Storage.get("mq_usuario_atual");
       if(atual?.codigo){
         const filhos=Storage.get("mq_filhos")||[];
@@ -865,13 +869,13 @@ function QuizScreen({ go, toast, showBurst }) {
   const m=QM[mode];
 
   if(end)return(
-    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:`linear-gradient(160deg,${C.blueBg},${C.dark})`,gap:14,padding:24}}>
+    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"space-evenly",background:`linear-gradient(160deg,${C.blueBg},${C.dark})`,gap:8,padding:"16px 20px"}}>
       <div style={{background:acertos>=ACERTOS_NECESSARIOS?"linear-gradient(135deg,#FFD700,#FF8C00)":"linear-gradient(135deg,#37474F,#263238)",borderRadius:24,padding:"16px 32px",textAlign:"center",width:"100%",boxShadow:acertos>=ACERTOS_NECESSARIOS?`0 8px 0 #B86000`:"0 8px 0 #1C2526"}}>
         <div style={{fontSize:28,fontWeight:900,color:acertos>=ACERTOS_NECESSARIOS?C.dark:"white",fontFamily:"'Fredoka One',sans-serif"}}>{acertos>=ACERTOS_NECESSARIOS?"FASE COMPLETA! 🎉":"Tente mais uma vez! 💪"}</div>
         <div style={{fontSize:14,color:acertos>=ACERTOS_NECESSARIOS?C.dark+"aa":"rgba(255,255,255,0.7)",fontWeight:700,marginTop:4}}>{acertos}/{ACERTOS_NECESSARIOS} acertos</div>
       </div>
-      <div style={{animation:"heroFloat 1.5s ease-in-out infinite"}}><MaxHero sz={110} mood={acertos>=ACERTOS_NECESSARIOS?"wow":"sad"}/></div>
-      <div style={{display:"flex",gap:6}}>{[1,2,3].map(s=>(<div key={s} style={{animation:s<=(acertos>=5?3:acertos>=3?2:acertos>=1?1:0)?`popIn 0.4s ${s*0.15}s both`:"none"}}><Star on={s<=(acertos>=5?3:acertos>=3?2:acertos>=1?1:0)} sz={52}/></div>))}</div>
+      <div style={{animation:"heroFloat 1.5s ease-in-out infinite"}}><MaxHero sz={80} mood={acertos>=ACERTOS_NECESSARIOS?"wow":"sad"}/></div>
+      <div style={{display:"flex",gap:8}}>{[1,2,3].map(s=>(<div key={s} style={{animation:s<=(acertos>=5?3:acertos>=3?2:acertos>=1?1:0)?`popIn 0.4s ${s*0.15}s both`:"none"}}><Star on={s<=(acertos>=5?3:acertos>=3?2:acertos>=1?1:0)} sz={44}/></div>))}</div>
       <div style={{background:`${C.gold}18`,border:`3px solid ${C.gold}55`,borderRadius:20,padding:"12px 32px",fontSize:22,fontWeight:900,color:C.gold,fontFamily:"'Fredoka One',sans-serif"}}>⭐ {acertos} de {ACERTOS_NECESSARIOS} acertos</div>
       {acertos>=ACERTOS_NECESSARIOS ? (
         <div style={{display:"flex",flexDirection:"column",gap:8,width:"100%"}}>
@@ -1619,9 +1623,9 @@ export default function App(){
 
         {isGame&&(
           <div style={{display:"flex",alignItems:"center",gap:6,padding:"5px 10px 6px",background:`linear-gradient(180deg,#0A1628,${C.card})`,borderBottom:`3px solid ${C.gold}`}}>
-            <div style={{flex:1,height:13,background:"rgba(0,0,0,0.4)",borderRadius:20,border:`2px solid rgba(30,144,255,0.3)`,overflow:"hidden",position:"relative"}}>
-              <div style={{position:"absolute",inset:0,width:`${Math.min((xpProg/500)*100,100)}%`,background:`linear-gradient(90deg,${C.green},#1B8A3A)`,borderRadius:20,transition:"width 0.5s"}}/>
-              <span style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",zIndex:1}}>Nv.{nivelReal} · {xpReal} XP</span>
+            <div style={{flex:1,height:16,background:"rgba(0,0,0,0.5)",borderRadius:20,border:`2px solid ${C.green}66`,overflow:"hidden",position:"relative"}}>
+              <div style={{position:"absolute",top:0,left:0,bottom:0,width:`${Math.min((xpProg/500)*100,100)}%`,background:`linear-gradient(90deg,${C.green},#27AE60)`,borderRadius:20,transition:"width 0.8s ease",boxShadow:`0 0 8px ${C.green}88`}}/>
+              <span style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif",zIndex:1,textShadow:"0 1px 3px rgba(0,0,0,0.8)"}}>Nv.{nivelReal} · {xpReal} XP</span>
             </div>
             <div style={{display:"flex",alignItems:"center",gap:4,background:"linear-gradient(135deg,#BF360C,#E64A19)",borderRadius:22,padding:"3px 10px",border:`2px solid ${C.orange}`}}>
               <Coin sz={15}/><span style={{fontSize:12,fontWeight:900,color:"white",fontFamily:"'Fredoka One',sans-serif"}}>{moedasReal}</span>
